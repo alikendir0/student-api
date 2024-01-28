@@ -16,31 +16,10 @@ app.use(function (req, res, next) {
 });
 
 let tableContents = [
-  ["", "Ad", "Soyad", "T.C. Kimlik Numarasi", " Öğrenci Numarası", ""],
-  [
-    '<input class="Checkbox" type="checkbox">',
-    "Ali",
-    "Kendir",
-    "10000000146",
-    "123456",
-    '<button class="ders-button">Dersler</button>',
-  ],
-  [
-    '<input class="Checkbox" type="checkbox">',
-    "Alp",
-    "Kendir",
-    "10000000146",
-    "123456",
-    '<button class="ders-button">Dersler</button>',
-  ],
-  [
-    '<input class="Checkbox" type="checkbox">',
-    "Alp",
-    "Kendir",
-    "10000000146",
-    "123456",
-    '<button class="ders-button">Dersler</button>',
-  ],
+  ["Ad", "Soyad", "T.C. Kimlik Numarasi", " Öğrenci Numarası"],
+  ["Ali", "Kendir", "10000000146", "123456"],
+  ["Alp", "Kendir", "10000000146", "123456"],
+  ["Alp", "Kendir", "10000000146", "123456"],
 ];
 app.listen(PORT, () => console.log(`Running Express Server on Port ${PORT}`));
 
