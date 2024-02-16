@@ -1,118 +1,94 @@
-let studentTableContents = [
-  {
-    ad: "1",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100", "LIT100"],
-  },
-  {
-    ad: "2",
-    soyad: "Kendir",
-    tcNo: "99999999146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "3",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "4",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "654321",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "5",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "6",
-    soyad: "Kendir",
-    tcNo: "99999999146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "7",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "123456",
-    dersler: ["HIST100"],
-  },
-  {
-    ad: "8",
-    soyad: "Kendir",
-    tcNo: "10000000146",
-    ogrenciNo: "654321",
-    dersler: [],
-  },
-];
+const fs = require("fs");
 
 module.exports = function (app) {
   app.get("/studentTableContents", (req, res) => {
+    const studentTableContents = getFile();
     res.send({ data: studentTableContents, size: studentTableContents.length });
   });
 
   app.get("/studentTableContents/:index", (req, res) => {
+    const studentTableContents = getFile();
     const index = req.params.index;
     const student = studentTableContents[index];
     res.send({ dersler: student.dersler, length: student.dersler.length });
   });
 
   app.post("/studentTableContents", function (req, res) {
-    var temp = credentialsCheck(
-      req.body.ad,
-      req.body.soyad,
-      req.body.tcNo,
-      req.body.ogrenciNo
-    );
-    if (temp === 1) {
-      studentTableContents.push(req.body);
-      res
-        .status(200)
-        .json({ message: "Data received successfully", code: temp });
-    } else res.status(400).json({ message: "Invalid tcNo", code: temp });
+    addStudent(req.body, res);
   });
 
   app.post("/studentTableContents/:index", function (req, res) {
-    res.status(200).json({ message: "Data received successfully" });
-    const index = req.params.index;
-    const student = studentTableContents[index];
-    if (!student.dersler.includes(req.body.kod))
-      student.dersler.push(req.body.kod);
+    addClass(req.params.index, req.body, res);
   });
 
   app.delete("/studentTableContents/data/:index", (req, res) => {
-    const index = req.params.index;
-    studentTableContents.splice(index, 1);
-    res.send({
-      message: "Content deleted successfully",
-    });
+    deleteStudent(req.params.index, res);
   });
 
   app.delete("/studentTableContents/data", (req, res) => {
-    for (let i = 0; i < studentTableContents.length; i++) {
-      studentTableContents[i].dersler = [];
-    }
-    res.send({
-      message: "Content deleted successfully",
-    });
+    deleteClasses(res);
   });
 };
 
-function credentialsCheck(ad, soyad, tcNo, ogrenciNo) {
+function getFile() {
+  try {
+    const data = fs.readFileSync("studentTableContents.json");
+    return JSON.parse(data);
+  } catch (error) {
+    fs.writeFileSync("studentTableContents.json", "[]");
+    return [];
+  }
+}
+
+function saveFile(data) {
+  fs.writeFileSync("studentTableContents.json", JSON.stringify(data, null, 2));
+}
+
+function addStudent(data, res) {
+  const temp = credentialsCheck(data);
+  if (temp === 0) {
+    const studentTableContents = getFile();
+    studentTableContents.push(data);
+    saveFile(studentTableContents);
+
+    res.status(200).json({ message: "Data received successfully", code: temp });
+  } else res.status(400).json({ message: "Invalid information.", code: temp });
+}
+
+function deleteStudent(index, res) {
+  const studentTableContents = getFile();
+  studentTableContents.splice(index, 1);
+  saveFile(studentTableContents);
+  res.send({
+    message: "Content deleted successfully",
+  });
+}
+
+function addClass(index, data, res) {
+  const studentTableContents = getFile();
+  var dersler = studentTableContents[index].dersler;
+  if (!dersler.includes(data.kod)) {
+    dersler.push(data.kod);
+    saveFile(studentTableContents);
+    res.status(200).json({ message: "Data received successfully" });
+  } else res.status(409).json({ message: "Data already exists" });
+}
+
+function deleteClasses(res) {
+  const studentTableContents = getFile();
+  for (let i = 0; i < studentTableContents.length; i++) {
+    studentTableContents[i].dersler = [];
+  }
+  saveFile(studentTableContents);
+  res.send({
+    message: "Content deleted successfully",
+  });
+}
+
+function credentialsCheck(data) {
   let temp = true;
   while (temp) {
-    if (!(ad === null || ad === "")) {
+    if (!(data.ad === null || data.ad === "")) {
       temp = false;
     } else {
       return 1;
@@ -121,7 +97,7 @@ function credentialsCheck(ad, soyad, tcNo, ogrenciNo) {
 
   temp = true;
   while (temp) {
-    if (!(soyad === null || soyad === "")) {
+    if (!(data.soyad === null || data.soyad === "")) {
       temp = false;
     } else {
       return 2;
@@ -130,7 +106,7 @@ function credentialsCheck(ad, soyad, tcNo, ogrenciNo) {
 
   temp = true;
   while (temp) {
-    if (tcNoCheck(tcNo)) {
+    if (tcNoCheck(data.tcNo)) {
       temp = false;
     } else {
       return 3;
@@ -139,7 +115,7 @@ function credentialsCheck(ad, soyad, tcNo, ogrenciNo) {
 
   temp = true;
   while (temp) {
-    if (ogrenciNo.length === 6) {
+    if (data.ogrenciNo.length === 6) {
       temp = false;
     } else {
       return 4;

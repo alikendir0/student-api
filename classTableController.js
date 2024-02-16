@@ -1,113 +1,102 @@
-let classTableContents = [
-  {
-    kod: "1",
-    fakulte: "Kendir",
-    zaman: "10.40",
-    sinif: "A176",
-    ogretici: "Kendir2",
-  },
-  {
-    kod: "2",
-    fakulte: "Kendir",
-    zaman: "10.40",
-    sinif: "A176",
-    ogretici: "Kendir2",
-  },
-  {
-    kod: "3",
-    fakulte: "Kendir",
-    zaman: "10.40",
-    sinif: "A176",
-    ogretici: "Kendir2",
-  },
-  {
-    kod: "4",
-    fakulte: "Kendir",
-    zaman: "10.40",
-    sinif: "A176",
-    ogretici: "Kendir2",
-  },
-];
+const fs = require("fs");
 
 module.exports = function (app) {
   app.get("/classTableContents", (req, res) => {
+    const classTableContents = getFile();
     res.send({ data: classTableContents, size: classTableContents.length });
   });
 
   app.post("/classTableContents", function (req, res) {
-    if (
-      credentialsCheck(
-        req.body.kod,
-        req.body.fakulte,
-        req.body.zaman,
-        req.body.sinif,
-        req.body.ogretici
-      )
-    ) {
-      classTableContents.push(req.body);
-      res.status(200).json({ message: "Data received successfully", code: 1 });
-    } else {
-      res.status(400).json({ message: "Invalid Information", code: 0 });
-    }
+    addClass(req.body, res);
   });
 
-  app.delete("/classTableContents/data/:id", (req, res) => {
-    const id = req.params.id;
-    classTableContents.splice(id, 1);
-    res.send({
-      message: "Content deleted successfully",
-    });
+  app.delete("/classTableContents/data/:index", (req, res) => {
+    deleteClass(req.params.index, res);
   });
 };
 
-function credentialsCheck(kod, fakulte, zaman, sinif, ogretici) {
+function getFile() {
+  try {
+    const data = fs.readFileSync("classTableContents.json");
+    return JSON.parse(data);
+  } catch (error) {
+    fs.writeFileSync("classTableContents.json", "[]");
+    return [];
+  }
+}
+
+function saveFile(data) {
+  fs.writeFileSync("classTableContents.json", JSON.stringify(data, null, 2));
+}
+
+function addClass(data, res) {
+  const temp = credentialsCheck(data);
+  if (temp === 0) {
+    const classTableContents = getFile();
+    classTableContents.push(data);
+    saveFile(classTableContents);
+
+    res.status(200).json({ message: "Data received successfully", code: temp });
+  } else res.status(400).json({ message: "Invalid information.", code: temp });
+}
+
+function deleteClass(index, res) {
+  const classTableContents = getFile();
+  classTableContents.splice(index, 1);
+  saveFile(classTableContents);
+  res.send({
+    message: "Content deleted successfully",
+  });
+}
+
+function credentialsCheck(data) {
   let temp = true;
   while (temp) {
-    if (!(kod === null || kod === "")) {
+    if (!(data.kod === null || data.kod === "")) {
       temp = false;
     } else {
-      return false;
+      return 1;
     }
   }
 
   temp = true;
 
   while (temp) {
-    if (!(fakulte === null || fakulte === "")) {
+    if (!(data.fakulte === null || data.fakulte === "")) {
       temp = false;
     } else {
-      return false;
+      return 2;
     }
   }
 
   temp = true;
 
   while (temp) {
-    if (!(zaman === null || zaman === "")) {
+    if (!(data.zaman === null || data.zaman === "")) {
       temp = false;
     } else {
-      return false;
+      return 3;
     }
   }
 
   temp = true;
 
   while (temp) {
-    if (!(sinif === null || sinif === "")) {
+    if (!(data.sinif === null || data.sinif === "")) {
       temp = false;
     } else {
-      return false;
+      return 4;
     }
   }
 
   temp = true;
 
   while (temp) {
-    if (!(ogretici === null || ogretici === "")) {
+    if (!(data.ogretici === null || data.ogretici === "")) {
       temp = false;
     } else {
-      return false;
+      return 5;
     }
   }
-  return true;
+  return 0;
 }
