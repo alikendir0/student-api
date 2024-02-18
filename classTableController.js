@@ -1,16 +1,16 @@
 const fs = require("fs");
 
 module.exports = function (app) {
-  app.get("/classTableContents", (req, res) => {
+  app.get("/classes/get", (req, res) => {
     const classTableContents = getFile();
     res.send({ data: classTableContents, size: classTableContents.length });
   });
 
-  app.post("/classTableContents", function (req, res) {
+  app.post("/classes/add", function (req, res) {
     addClass(req.body, res);
   });
 
-  app.delete("/classTableContents/data/:index", (req, res) => {
+  app.delete("/classes/delete/:index", (req, res) => {
     deleteClass(req.params.index, res);
   });
 };
@@ -33,7 +33,9 @@ function addClass(data, res) {
   const temp = credentialsCheck(data);
   if (temp === 0) {
     const classTableContents = getFile();
-    classTableContents.push(data);
+    const { kod, fakulte, zaman, sinif, ogretici } = data;
+    const newClass = { kod, fakulte, zaman, sinif, ogretici };
+    classTableContents.push(newClass);
     saveFile(classTableContents);
 
     res.status(200).json({ message: "Data received successfully", code: temp });
@@ -50,53 +52,36 @@ function deleteClass(index, res) {
 }
 
 function credentialsCheck(data) {
-  let temp = true;
-  while (temp) {
-    if (!(data.kod === null || data.kod === "")) {
-      temp = false;
-    } else {
-      return 1;
-    }
-  }
+  if (data.kod === null || data.kod === "" || !(typeof data.kod === "string"))
+    return 1;
 
-  temp = true;
+  if (
+    data.fakulte === null ||
+    data.fakulte === "" ||
+    !(typeof data.fakulte === "string")
+  )
+    return 2;
 
-  while (temp) {
-    if (!(data.fakulte === null || data.fakulte === "")) {
-      temp = false;
-    } else {
-      return 2;
-    }
-  }
+  if (
+    data.zaman === null ||
+    data.zaman === "" ||
+    !(typeof data.zaman === "string")
+  )
+    return 3;
 
-  temp = true;
+  if (
+    data.sinif === null ||
+    data.sinif === "" ||
+    !(typeof data.sinif === "string")
+  )
+    return 4;
 
-  while (temp) {
-    if (!(data.zaman === null || data.zaman === "")) {
-      temp = false;
-    } else {
-      return 3;
-    }
-  }
+  if (
+    data.ogretici === null ||
+    data.ogretici === "" ||
+    !(typeof data.ogretici === "string")
+  )
+    return 5;
 
-  temp = true;
-
-  while (temp) {
-    if (!(data.sinif === null || data.sinif === "")) {
-      temp = false;
-    } else {
-      return 4;
-    }
-  }
-
-  temp = true;
-
-  while (temp) {
-    if (!(data.ogretici === null || data.ogretici === "")) {
-      temp = false;
-    } else {
-      return 5;
-    }
-  }
   return 0;
 }

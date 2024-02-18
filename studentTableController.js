@@ -1,32 +1,32 @@
 const fs = require("fs");
 
 module.exports = function (app) {
-  app.get("/studentTableContents", (req, res) => {
+  app.get("/students/get", (req, res) => {
     const studentTableContents = getFile();
     res.send({ data: studentTableContents, size: studentTableContents.length });
   });
 
-  app.get("/studentTableContents/:index", (req, res) => {
+  app.get("/students/getclasses/:index", (req, res) => {
     const studentTableContents = getFile();
     const index = req.params.index;
     const student = studentTableContents[index];
     res.send({ dersler: student.dersler, length: student.dersler.length });
   });
 
-  app.post("/studentTableContents", function (req, res) {
+  app.post("/students/add", function (req, res) {
     addStudent(req.body, res);
   });
 
-  app.post("/studentTableContents/:index", function (req, res) {
+  app.post("/students/assign/:index", function (req, res) {
     addClass(req.params.index, req.body, res);
   });
 
-  app.delete("/studentTableContents/data/:index", (req, res) => {
+  app.delete("/students/delete/:index", (req, res) => {
     deleteStudent(req.params.index, res);
   });
 
-  app.delete("/studentTableContents/data", (req, res) => {
-    deleteClasses(res);
+  app.delete("/students/deassign", (req, res) => {
+    deleteClasses(req.body.indexes, res);
   });
 };
 
@@ -48,7 +48,9 @@ function addStudent(data, res) {
   const temp = credentialsCheck(data);
   if (temp === 0) {
     const studentTableContents = getFile();
-    studentTableContents.push(data);
+    const { ad, soyad, tcNo, ogrenciNo, dersler = [] } = data;
+    const newStudent = { ad, soyad, tcNo, ogrenciNo, dersler };
+    studentTableContents.push(newStudent);
     saveFile(studentTableContents);
 
     res.status(200).json({ message: "Data received successfully", code: temp });
@@ -67,59 +69,43 @@ function deleteStudent(index, res) {
 function addClass(index, data, res) {
   const studentTableContents = getFile();
   var dersler = studentTableContents[index].dersler;
-  if (!dersler.includes(data.kod)) {
+  if (typeof data.kod === "string" && !dersler.includes(data.kod)) {
     dersler.push(data.kod);
     saveFile(studentTableContents);
     res.status(200).json({ message: "Data received successfully" });
   } else res.status(409).json({ message: "Data already exists" });
 }
 
-function deleteClasses(res) {
+function deleteClasses(indexes, res) {
   const studentTableContents = getFile();
-  for (let i = 0; i < studentTableContents.length; i++) {
-    studentTableContents[i].dersler = [];
-  }
-  saveFile(studentTableContents);
-  res.send({
-    message: "Content deleted successfully",
-  });
+  if (indexes && typeof indexes === "object" && indexes.length > 0) {
+    for (let i = 0; i < indexes.length; i++) {
+      studentTableContents[indexes[i] - 1].dersler = [];
+    }
+    saveFile(studentTableContents);
+    res.send({
+      message: "Content deleted successfully",
+    });
+  } else res.status(400).json({ message: "Invalid information." });
 }
 
 function credentialsCheck(data) {
-  let temp = true;
-  while (temp) {
-    if (!(data.ad === null || data.ad === "")) {
-      temp = false;
-    } else {
-      return 1;
-    }
-  }
+  if (data.ad === null || data.ad === "" || !(typeof data.ad === "string"))
+    return 1;
 
-  temp = true;
-  while (temp) {
-    if (!(data.soyad === null || data.soyad === "")) {
-      temp = false;
-    } else {
-      return 2;
-    }
-  }
+  if (
+    data.soyad === null ||
+    data.soyad === "" ||
+    !(typeof data.soyad === "string")
+  )
+    return 2;
 
-  temp = true;
-  while (temp) {
-    if (tcNoCheck(data.tcNo)) {
-      temp = false;
-    } else {
-      return 3;
-    }
-  }
+  if (!tcNoCheck(data.tcNo)) return 3;
 
-  temp = true;
-  while (temp) {
-    if (data.ogrenciNo.length === 6) {
-      temp = false;
-    } else {
-      return 4;
-    }
+  if (!(data.ogrenciNo.length === 6)) return 4;
+
+  if (data.dersler || !(typeof data.dersler === "string")) {
+    if (!(typeof data.dersler === "object")) return 5;
   }
   return 0;
 }
