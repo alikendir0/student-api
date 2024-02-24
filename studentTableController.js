@@ -3,32 +3,69 @@ const fs = require("fs");
 module.exports = function (app) {
   app.get("/students/get", (req, res) => {
     const studentTableContents = getFile();
-    res.send({ data: studentTableContents, size: studentTableContents.length });
+    sendResponse(res, 200, 0, {
+      table: studentTableContents,
+      size: studentTableContents.length,
+    });
   });
 
   app.get("/students/getclasses/:index", (req, res) => {
     const studentTableContents = getFile();
-    const index = req.params.index;
-    const student = studentTableContents[index];
-    res.send({ dersler: student.dersler, length: student.dersler.length });
+    const student = studentTableContents[req.params.index];
+    sendResponse(res, 201, 0, {
+      dersler: student.dersler,
+      length: student.dersler.length,
+    });
   });
 
   app.post("/students/add", function (req, res) {
-    addStudent(req.body, res);
+    const code = addStudent(req.body);
+    if (code === 0) sendResponse(res, 201, code);
+    else sendResponse(res, 400, code);
   });
 
   app.post("/students/assign/:index", function (req, res) {
-    addClass(req.params.index, req.body, res);
+    const code = addClass(req.params.index, req.body);
+    if (code === 0) sendResponse(res, 201, code);
+    else if (code === 1) sendResponse(res, 409, code);
+    else sendResponse(res, 400, code);
   });
 
   app.delete("/students/delete/:index", (req, res) => {
-    deleteStudent(req.params.index, res);
+    const code = deleteStudent(req.params.index);
+    if (code === 0) sendResponse(res, 200, code);
+    else sendResponse(res, 400, code);
   });
 
   app.delete("/students/deassign", (req, res) => {
-    deleteClasses(req.body.indexes, res);
+    const code = deleteClasses(req.body.indexes, res);
+    if (code === 0) sendResponse(res, 200, code);
+    else sendResponse(res, 400, code);
   });
 };
+
+function sendResponse(res, statusCode, code, data = {}) {
+  switch (statusCode) {
+    case 200:
+      res.status(statusCode).json({ code: code, d: data, message: "OK" });
+      break;
+    case 201:
+      res.status(statusCode).json({ code: code, d: data, message: "Created" });
+      break;
+    case 400:
+      res
+        .status(statusCode)
+        .json({ code: code, d: data, message: "Bad Request" });
+      break;
+    case 409:
+      res.status(statusCode).json({ code: code, d: data, message: "Conflict" });
+      break;
+    default:
+      res
+        .status(500)
+        .json({ code: code, d: data, message: "Internal Server Error" });
+  }
+}
 
 function getFile() {
   try {
@@ -44,36 +81,50 @@ function saveFile(data) {
   fs.writeFileSync("studentTableContents.json", JSON.stringify(data, null, 2));
 }
 
-function addStudent(data, res) {
-  const temp = credentialsCheck(data);
+function createStudent(student) {
+  const temp = credentialsCheck(student);
   if (temp === 0) {
+    const { ad, soyad, tcNo, ogrenciNo, dersler = [] } = student;
+    const newStudent = {
+      ad,
+      soyad,
+      tcNo,
+      ogrenciNo,
+      dersler,
+    };
+    return { code: temp, info: newStudent };
+  }
+  return { code: temp };
+}
+
+function addStudent(student) {
+  const newStudent = createStudent(student);
+  if (newStudent.code === 0) {
     const studentTableContents = getFile();
-    const { ad, soyad, tcNo, ogrenciNo, dersler = [] } = data;
-    const newStudent = { ad, soyad, tcNo, ogrenciNo, dersler };
-    studentTableContents.push(newStudent);
+    studentTableContents.push(newStudent.info);
     saveFile(studentTableContents);
-
-    res.status(200).json({ message: "Data received successfully", code: temp });
-  } else res.status(400).json({ message: "Invalid information.", code: temp });
+    return newStudent.code;
+  } else return newStudent.code;
 }
 
-function deleteStudent(index, res) {
+function deleteStudent(index) {
   const studentTableContents = getFile();
-  studentTableContents.splice(index, 1);
-  saveFile(studentTableContents);
-  res.send({
-    message: "Content deleted successfully",
-  });
+  if (studentTableContents.length > index) {
+    studentTableContents.splice(index, 1);
+    saveFile(studentTableContents);
+    return 0;
+  } else return 1;
 }
 
-function addClass(index, data, res) {
+function addClass(index, data) {
   const studentTableContents = getFile();
   var dersler = studentTableContents[index].dersler;
   if (typeof data.kod === "string" && !dersler.includes(data.kod)) {
     dersler.push(data.kod);
     saveFile(studentTableContents);
-    res.status(200).json({ message: "Data received successfully" });
-  } else res.status(409).json({ message: "Data already exists" });
+    return 0;
+  } else if (dersler.includes(data.kod)) return 1;
+  else return 2;
 }
 
 function deleteClasses(indexes, res) {
@@ -83,10 +134,8 @@ function deleteClasses(indexes, res) {
       studentTableContents[indexes[i] - 1].dersler = [];
     }
     saveFile(studentTableContents);
-    res.send({
-      message: "Content deleted successfully",
-    });
-  } else res.status(400).json({ message: "Invalid information." });
+    return 0;
+  } else return 1;
 }
 
 function credentialsCheck(data) {
@@ -104,8 +153,9 @@ function credentialsCheck(data) {
 
   if (!(data.ogrenciNo.length === 6)) return 4;
 
-  if (data.dersler || !(typeof data.dersler === "string")) {
-    if (!(typeof data.dersler === "object")) return 5;
+  if (!(typeof data.dersler === "object")) {
+    console.log(typeof data.dersler);
+    return 5;
   }
   return 0;
 }
