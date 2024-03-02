@@ -65,8 +65,7 @@ const reset = (ids) => {
   const students = fileManager.getFile(studentsPath);
 
   for (const i in ids) {
-    const id = ids[i];
-    console.log(id);
+    const id = Number(ids[i]);
     const index = students.findIndex((student) => student.id === id);
     if (index != -1) {
       students[index].courses = [];
@@ -86,14 +85,18 @@ const reset = (ids) => {
   }
 };
 
-const assign = (id, courses) => {
+const assign = (id, courseIds) => {
   const students = fileManager.getFile(studentsPath);
+  const courses = fileManager.getFile("data/courses.json");
   const index = students.findIndex((student) => student.id === Number(id));
-  var temp = 0;
+  let temp = 0;
   if (index != -1) {
-    for (const c in courses) {
-      if (!students[index].courses.includes(courses[c])) {
-        students[index].courses.push(courses[c]);
+    for (const c in courseIds) {
+      const indexCo = courses.findIndex(
+        (course) => course.id === Number(courseIds[c])
+      );
+      if (!students[index].courses.includes(courses[indexCo].code)) {
+        students[index].courses.push(courses[indexCo].code);
         temp++;
       }
     }
