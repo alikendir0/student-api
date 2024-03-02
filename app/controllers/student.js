@@ -21,12 +21,12 @@ module.exports = function (app) {
     res.status(response.status).json(response);
   });
 
-  app.post("/student/assign/:id", function (req, res) {
+  app.post("/student/add/course/:id", function (req, res) {
     const response = studentService.assign(req.params.id, req.body.courses);
     res.status(response.status).json(response);
   });
 
-  app.delete("/student/drop", (req, res) => {
+  app.delete("/students/delete/courses", (req, res) => {
     const response = studentService.reset(req.body.ids);
     res.status(response.status).json(response);
   });

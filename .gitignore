@@ -3,3 +3,5 @@ node_modules
 .vscode
 
 *.json
+
+data

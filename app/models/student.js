@@ -2,34 +2,34 @@ const { ValidationError } = require("./error");
 const Base = require("./base");
 
 class Student extends Base {
-  constructor(ad, soyad, tcNo, ogrenciNo, dersler = []) {
+  constructor(name, lastName, idNo, studentNo, courses = []) {
     super();
-    this.ad = ad;
-    this.soyad = soyad;
-    this.tcNo = tcNo;
-    this.ogrenciNo = ogrenciNo;
-    this.dersler = dersler;
+    this.name = name;
+    this.lastName = lastName;
+    this.idNo = idNo;
+    this.studentNo = studentNo;
+    this.courses = courses;
   }
 
   static create(studentData) {
     const validation = this.validate(studentData);
     if (validation === true) {
       return new Student(
-        studentData.ad,
-        studentData.soyad,
-        studentData.tcNo,
-        studentData.ogrenciNo,
-        studentData.dersler
+        studentData.name,
+        studentData.lastName,
+        studentData.idNo,
+        studentData.studentNo,
+        studentData.courses
       );
     }
     return validation;
   }
 
-  assignCourse(kod) {
-    if (typeof kod === "string" && !this.dersler.includes(kod)) {
-      this.dersler.push(kod);
+  assignCourse(code) {
+    if (typeof code === "string" && !this.courses.includes(code)) {
+      this.courses.push(code);
       return 0;
-    } else if (this.dersler.includes(kod)) {
+    } else if (this.courses.includes(code)) {
       return 1;
     } else {
       return 2;
@@ -37,57 +37,46 @@ class Student extends Base {
   }
 
   resetCourses() {
-    this.dersler = [];
-  }
-
-  set(student) {
-    if (data.ad) {
-      this.ad = data.ad;
-    } else if (data.soyad) {
-      this.soyad = data.soyad;
-    } else if (data.tcNo) {
-      this.tcNo = data.tcNo;
-    } else if (data.ogrenciNo) {
-      this.ogrenciNo = data.ogrenciNo;
-    } else if (data.tcNo) {
-      this.tcNo = data.tcNo;
-    }
-    return;
+    this.courses = [];
   }
 
   static validate(data) {
     const errors = [];
 
-    if (data.ad === null || data.ad === "" || !(typeof data.ad === "string")) {
-      errors.push(new ValidationError("Name is not valid or empty", data.ad));
+    if (
+      data.name === null ||
+      data.name === "" ||
+      !(typeof data.name === "string")
+    ) {
+      errors.push(new ValidationError("Name is not valid or empty", data.name));
     }
 
     if (
-      data.soyad === null ||
-      data.soyad === "" ||
-      !(typeof data.soyad === "string")
+      data.lastName === null ||
+      data.lastName === "" ||
+      !(typeof data.lastName === "string")
     ) {
       errors.push(
-        new ValidationError("Surname is not valid or empty", data.soyad)
+        new ValidationError("Surname is not valid or empty", data.lastName)
       );
     }
 
-    if (!this.tcNoCheck(data.tcNo)) {
-      errors.push(new ValidationError("TC number is not valid", data.tcNo));
+    if (!this.idNoCheck(data.idNo)) {
+      errors.push(new ValidationError("ID number is not valid", data.idNo));
     }
 
-    if (data.ogrenciNo && data.ogrenciNo.length !== 6) {
+    if (data.studentNo && data.studentNo.length !== 6) {
       errors.push(
-        new ValidationError("Student number is not valid", data.ogrenciNo)
+        new ValidationError("Student number is not valid", data.studentNo)
       );
-    } else if (data.ogrenciNo === null || data.ogrenciNo === "") {
+    } else if (data.studentNo === null || data.studentNo === "") {
       errors.push(
-        new ValidationError("Student number can't be empty", data.ogrenciNo)
+        new ValidationError("Student number can't be empty", data.studentNo)
       );
     }
 
-    if (data.dersler && !data.dersler instanceof Array) {
-      errors.push(new ValidationError("Courses are not valid", data.dersler));
+    if (data.courses && !data.courses instanceof Array) {
+      errors.push(new ValidationError("Courses are not valid", data.courses));
     }
 
     if (errors.length > 0) {
@@ -97,9 +86,9 @@ class Student extends Base {
     return true;
   }
 
-  static tcNoCheck(tcNo) {
-    var temp = String(tcNo).split("").map(Number);
-    if (!/^\d{11}$/.test(tcNo)) return false;
+  static idNoCheck(idNo) {
+    var temp = String(idNo).split("").map(Number);
+    if (!/^\d{11}$/.test(idNo)) return false;
 
     let temp10 = 0;
     let temp11 = 0;

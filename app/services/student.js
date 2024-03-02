@@ -15,7 +15,7 @@ const getCourses = (id) => {
   const student = students.filter((student) => student.id === Number(id))[0];
 
   if (student) {
-    return new Response(ResponseStatus.SUCCESS, student.dersler);
+    return new Response(ResponseStatus.SUCCESS, student.courses);
   } else {
     return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found");
   }
@@ -61,7 +61,7 @@ const save = (data) => {
 
 const reset = (ids) => {
   var success = [];
-  var unsuccess = [];
+  var failure = [];
   const students = fileManager.getFile(studentsPath);
 
   for (const i in ids) {
@@ -69,20 +69,20 @@ const reset = (ids) => {
     console.log(id);
     const index = students.findIndex((student) => student.id === id);
     if (index != -1) {
-      students[index].dersler = [];
+      students[index].courses = [];
       success.push(id);
     } else {
-      unsuccess.push(id);
+      failure.push(id);
     }
   }
   fileManager.saveFile(studentsPath, students);
   if (success.length > 0) {
     return new Response(
       ResponseStatus.SUCCESS,
-      `Successful ids:[${success}] Unsuccessful ids:[${unsuccess}]`
+      `Successful ids:[${success}] Failed ids:[${failure}]`
     );
   } else {
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found");
+    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
   }
 };
 
@@ -92,8 +92,8 @@ const assign = (id, courses) => {
   var temp = 0;
   if (index != -1) {
     for (const c in courses) {
-      if (!students[index].dersler.includes(courses[c])) {
-        students[index].dersler.push(courses[c]);
+      if (!students[index].courses.includes(courses[c])) {
+        students[index].courses.push(courses[c]);
         temp++;
       }
     }
@@ -102,7 +102,7 @@ const assign = (id, courses) => {
       return new Response(ResponseStatus.SUCCESS, `Success!`);
     } else return new Response(ResponseStatus.CONFLICT, `Code Conflict!`);
   } else
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found");
+    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
 };
 
 module.exports = {
