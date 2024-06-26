@@ -1,10 +1,18 @@
 [
   {
-    "id": 51,
-    "ad": "Ali Hadi",
-    "soyad": "Öztürk",
-    "tcNo": "11980059384",
-    "ogrenciNo": "123456",
-    "dersler": []
+    "id": 4,
+    "name": "ali",
+    "lastName": "kendir",
+    "idNo": "33467246162",
+    "studentNo": "123456",
+    "courses": []
+  },
+  {
+    "id": 4,
+    "name": "alaz",
+    "lastName": "yildirdi",
+    "idNo": "33467246162",
+    "studentNo": "123456",
+    "courses": []
   }
 ]

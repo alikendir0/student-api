@@ -31,5 +31,10 @@ module.exports = function (app) {
     res.status(response.status).json(response);
   });
 
+  app.delete("/student/delete/course/:id/:code", (req, res) => {
+    const response = studentService.deassign(req.params.id, req.params.code);
+    res.status(response.status).json(response);
+  });
+
   console.log("Student controller initialized...");
 };

@@ -86,6 +86,7 @@ const reset = (ids) => {
 };
 
 const assign = (id, courseIds) => {
+  console.log(id, courseIds);
   const students = fileManager.getFile(studentsPath);
   const courses = fileManager.getFile("data/courses.json");
   const index = students.findIndex((student) => student.id === Number(id));
@@ -108,6 +109,29 @@ const assign = (id, courseIds) => {
     return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
 };
 
+const deassign = (studentID, courseCode) => {
+  const students = fileManager.getFile(studentsPath);
+  const index = students.findIndex(
+    (student) => student.id === Number(studentID)
+  );
+  if (index != -1) {
+    const courseIndex = students[index].courses.findIndex(
+      (course) => course === courseCode
+    );
+    if (courseIndex != -1) {
+      students[index].courses.splice(courseIndex, 1);
+      fileManager.saveFile(studentsPath, students);
+      return new Response(ResponseStatus.SUCCESS, `Success!`);
+    } else
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Course not found!"
+      );
+  } else
+    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
+};
+
 module.exports = {
   list,
   getCourses,
@@ -115,4 +139,5 @@ module.exports = {
   save,
   reset,
   assign,
+  deassign,
 };
