@@ -3,13 +3,14 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("students", {
-      idNo: {
+      id: {
         unique: true,
         type: Sequelize.STRING(11),
       },
-      studentno: {
+      studentNo: {
         primaryKey: true,
         allowNull: false,
+        unique: true,
         type: Sequelize.STRING(6),
       },
       firstName: {

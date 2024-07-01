@@ -1,13 +1,13 @@
 // models/sectionModel.js
 module.exports = (sequelize, DataTypes) => {
   const Sections = sequelize.define("sections", {
-    sectionID: {
+    id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER,
     },
-    coursecode: {
+    courseCode: {
       type: DataTypes.STRING,
       allowNull: false,
       references: {
@@ -28,11 +28,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    instructorno: {
+    instructorNo: {
       type: DataTypes.STRING(6),
       references: {
         model: "instructor",
-        key: "instructorno",
+        key: "instructorNo",
       },
       onDelete: "SET NULL",
     },
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    nostudents: {
+    noStudents: {
       type: DataTypes.INTEGER,
     },
     createdAt: {

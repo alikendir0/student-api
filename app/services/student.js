@@ -1,9 +1,10 @@
 const Student = require("../models/student");
-const fileManager = require("../managers/file");
 const { Response, ResponseStatus } = require("../models/response");
 
 const db = require("../../models");
 const dbStudent = db.students;
+const dbCourse = db.studentCourses;
+const dbSection = db.sections;
 
 const studentsPath = "data/students.json";
 
@@ -15,52 +16,84 @@ const list = async () => {
   return new Response(ResponseStatus.SUCCESS, students);
 };
 
-const getCourses = (id) => {
-  const students = fileManager.getFile(studentsPath);
-
-  const student = students.filter((student) => student.id === Number(id))[0];
-
-  if (student) {
-    return new Response(ResponseStatus.SUCCESS, student.courses);
-  } else {
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found");
-  }
-};
-
-const del = (id) => {
-  const students = fileManager.getFile(studentsPath);
-
-  const index = students.findIndex((student) => {
-    if (student.id === Number(id)) {
-      return id;
+const getCourses = async (id) => {
+  try {
+    const data = await dbCourse.findAll({
+      where: { studentNo: id },
+      attributes: ["sectionID"],
+    });
+    if (!data) {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student not found!"
+      );
     }
-  });
-
-  if (index > -1) {
-    students.splice(index, 1);
-    fileManager.saveFile(studentsPath, students);
-
-    return new Response(ResponseStatus.SUCCESS, null);
-  } else {
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found");
+    const courseIDs = data.map((data) => data.dataValues);
+    const codeData = [];
+    for (const d of courseIDs) {
+      const section = await dbSection.findByPk(d.sectionID, {
+        attributes: ["courseCode"], // Assuming you want courseCode
+      });
+      if (section) {
+        codeData.push(section.courseCode); // Assuming you want to push courseCode
+      }
+    }
+    return new Response(ResponseStatus.SUCCESS, codeData);
+  } catch (error) {
+    console.error("Error fetching courses for student:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
   }
 };
 
-const save = (data) => {
-  const students = fileManager.getFile(studentsPath);
-
-  const student = Student.create(data);
-
-  if (student instanceof Student) {
-    students.push(student);
-    fileManager.saveFile(studentsPath, students);
-
-    return new Response(ResponseStatus.CREATED, student);
-  } else {
+const del = async (id) => {
+  try {
+    const student = await dbStudent.findOne({ where: { studentNo: id } });
+    console.log(student);
+    if (student) {
+      await student.destroy();
+      return new Response(ResponseStatus.SUCCESS, null);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student not found!"
+      );
+    }
+  } catch (error) {
+    console.error("Error deleting student:", error);
     return new Response(
-      ResponseStatus.BAD_REQUEST,
-      student,
-      "Invalid student data"
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
+const save = async (data) => {
+  try {
+    const student = Student.create(data);
+    console.log(data);
+    if (student instanceof Student) {
+      await dbStudent.create(student);
+      return new Response(ResponseStatus.CREATED, student);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        student,
+        "Invalid student data"
+      );
+    }
+  } catch (error) {
+    console.error("Error saving student:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
     );
   }
 };
@@ -91,28 +124,43 @@ const reset = (ids) => {
   }
 };
 
-const assign = (id, courseIds) => {
-  console.log(id, courseIds);
-  const students = fileManager.getFile(studentsPath);
-  const courses = fileManager.getFile("data/courses.json");
-  const index = students.findIndex((student) => student.id === Number(id));
-  let temp = 0;
-  if (index != -1) {
-    for (const c in courseIds) {
-      const indexCo = courses.findIndex(
-        (course) => course.id === Number(courseIds[c])
-      );
-      if (!students[index].courses.includes(courses[indexCo].code)) {
-        students[index].courses.push(courses[indexCo].code);
-        temp++;
-      }
+const assign = async (id, sectionIDs) => {
+  const errors = [];
+  const failed = [];
+  const success = [];
+  for (const sectionID of sectionIDs) {
+    try {
+      await dbCourse.create({
+        studentNo: id,
+        sectionID: sectionID,
+      });
+      success.push(sectionID);
+    } catch (error) {
+      errors.push(`Error processing sectionID ${sectionID}: ${error.message}`);
+      failed.push(sectionID);
     }
-    if (temp > 0) {
-      fileManager.saveFile(studentsPath, students);
-      return new Response(ResponseStatus.SUCCESS, `Success!`);
-    } else return new Response(ResponseStatus.CONFLICT, `Code Conflict!`);
-  } else
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
+  }
+  if (errors.length === sectionIDs.length) {
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred",
+      errors
+    );
+  }
+  if (errors.length > 0) {
+    return new Response(
+      ResponseStatus.SUCCESS,
+      `Successfully added ${success}, failed ID(s): ${failed}!`,
+      null,
+      errors
+    );
+  }
+  return new Response(
+    ResponseStatus.SUCCESS,
+    { message: "All sections assigned successfully" },
+    null
+  );
 };
 
 const deassign = (studentID, courseCode) => {

@@ -1,11 +1,11 @@
 module.exports = (sequelize, DataTypes) => {
   const Instructor = sequelize.define("instructors", {
-    idNo: {
+    id: {
       unique: true,
       allowNull: false,
       type: DataTypes.STRING(11),
     },
-    instructorno: {
+    instructorNo: {
       allowNull: false,
       type: DataTypes.STRING(6),
       primaryKey: true,

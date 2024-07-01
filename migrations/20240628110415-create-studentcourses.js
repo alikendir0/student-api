@@ -9,12 +9,12 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      studentno: {
+      studentNo: {
         type: Sequelize.STRING(11),
         allowNull: false,
         references: {
           model: "students",
-          key: "studentno",
+          key: "studentNo",
         },
         onDelete: "CASCADE",
       },
@@ -23,16 +23,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: "sections",
-          key: "sectionID",
-        },
-        onDelete: "CASCADE",
-      },
-      courseID: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "courses",
-          key: "courseID",
+          key: "id",
         },
         onDelete: "CASCADE",
       },
@@ -47,7 +38,7 @@ module.exports = {
     });
 
     await queryInterface.addConstraint("studentcourses", {
-      fields: ["studentno", "courseID"],
+      fields: ["studentNo", "sectionID"],
       type: "unique",
       name: "unique_student_course",
     });

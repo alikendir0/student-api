@@ -1,10 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
   const Students = sequelize.define("students", {
-    idNo: {
+    id: {
       unique: true,
       type: DataTypes.STRING(11),
     },
-    studentno: {
+    studentNo: {
       primaryKey: true,
       allowNull: false,
       type: DataTypes.STRING(6),

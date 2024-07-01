@@ -8,16 +8,14 @@ module.exports = {
       "studentcourses",
       [
         {
-          studentno: "123456",
+          studentNo: "123456",
           sectionID: 1,
-          courseID: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          studentno: "654321",
+          studentNo: "654321",
           sectionID: 2,
-          courseID: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

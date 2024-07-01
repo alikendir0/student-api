@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const Courses = sequelize.define("courses", {
-    courseID: {
+    id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: "faculties",
-        key: "facultyID",
+        key: "id",
       },
       onDelete: "CASCADE",
     },

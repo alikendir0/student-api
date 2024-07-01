@@ -12,24 +12,43 @@ module.exports = function (app) {
     }
   });
 
-  app.post("/student", function (req, res) {
-    const response = studentService.save(req.body);
-    res.status(response.status).json(response);
+  app.post("/student", async function (req, res) {
+    try {
+      const response = await studentService.save(req.body);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
-  app.delete("/student/:id", (req, res) => {
-    const response = studentService.del(req.params.id);
-    res.status(response.status).json(response);
+  app.delete("/student/:id", async (req, res) => {
+    try {
+      const response = await studentService.del(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
-  app.get("/student/courses/:id", (req, res) => {
-    const response = studentService.getCourses(req.params.id);
-    res.status(response.status).json(response);
+  app.get("/student/courses/:id", async (req, res) => {
+    try {
+      const response = await studentService.getCourses(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
-  app.post("/student/add/course/:id", function (req, res) {
-    const response = studentService.assign(req.params.id, req.body.courses);
-    res.status(response.status).json(response);
+  app.post("/student/add/course/:id", async (req, res) => {
+    try {
+      const response = await studentService.assign(
+        req.params.id,
+        req.body.courses
+      );
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
   app.delete("/students/delete/courses", (req, res) => {

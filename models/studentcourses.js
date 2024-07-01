@@ -8,12 +8,12 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      studentno: {
+      studentNo: {
         type: DataTypes.STRING(11),
         allowNull: false,
         references: {
           model: "students",
-          key: "studentno",
+          key: "studentNo",
         },
         onDelete: "CASCADE",
       },
@@ -22,16 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         references: {
           model: "sections",
-          key: "sectionID",
-        },
-        onDelete: "CASCADE",
-      },
-      courseID: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "courses",
-          key: "courseID",
+          key: "id",
         },
         onDelete: "CASCADE",
       },
@@ -48,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [
         {
           unique: true,
-          fields: ["studentno", "courseID"],
+          fields: ["studentNo", "sectionID"],
           name: "unique_student_course",
         },
       ],

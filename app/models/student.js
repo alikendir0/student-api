@@ -2,53 +2,38 @@ const { ValidationError } = require("./error");
 const Base = require("./base");
 
 class Student extends Base {
-  constructor(name, lastName, idNo, studentNo, courses = []) {
+  constructor(firstName, lastName, id, studentNo) {
     super();
-    this.name = name;
+    this.firstName = firstName;
     this.lastName = lastName;
-    this.idNo = idNo;
+    this.id = id;
     this.studentNo = studentNo;
-    this.courses = courses;
   }
 
   static create(studentData) {
     const validation = this.validate(studentData);
     if (validation === true) {
       return new Student(
-        studentData.name,
+        studentData.firstName,
         studentData.lastName,
-        studentData.idNo,
-        studentData.studentNo,
-        studentData.courses
+        studentData.id,
+        studentData.studentNo
       );
     }
     return validation;
-  }
-
-  assignCourse(code) {
-    if (typeof code === "string" && !this.courses.includes(code)) {
-      this.courses.push(code);
-      return 0;
-    } else if (this.courses.includes(code)) {
-      return 1;
-    } else {
-      return 2;
-    }
-  }
-
-  resetCourses() {
-    this.courses = [];
   }
 
   static validate(data) {
     const errors = [];
 
     if (
-      data.name === null ||
-      data.name === "" ||
-      !(typeof data.name === "string")
+      data.firstName === null ||
+      data.firstName === "" ||
+      !(typeof data.firstName === "string")
     ) {
-      errors.push(new ValidationError("Name is not valid or empty", data.name));
+      errors.push(
+        new ValidationError("Name is not valid or empty", data.firstName)
+      );
     }
 
     if (
@@ -61,8 +46,8 @@ class Student extends Base {
       );
     }
 
-    if (!this.idNoCheck(data.idNo)) {
-      errors.push(new ValidationError("ID number is not valid", data.idNo));
+    if (!this.idCheck(data.id)) {
+      errors.push(new ValidationError("ID number is not valid", data.id));
     }
 
     if (data.studentNo && data.studentNo.length !== 6) {
@@ -75,10 +60,6 @@ class Student extends Base {
       );
     }
 
-    if (data.courses && !data.courses instanceof Array) {
-      errors.push(new ValidationError("Courses are not valid", data.courses));
-    }
-
     if (errors.length > 0) {
       return errors;
     }
@@ -86,9 +67,9 @@ class Student extends Base {
     return true;
   }
 
-  static idNoCheck(idNo) {
-    var temp = String(idNo).split("").map(Number);
-    if (!/^\d{11}$/.test(idNo)) return false;
+  static idCheck(id) {
+    var temp = String(id).split("").map(Number);
+    if (!/^\d{11}$/.test(id)) return false;
 
     let temp10 = 0;
     let temp11 = 0;

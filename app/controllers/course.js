@@ -1,9 +1,13 @@
 module.exports = function (app) {
   const courseService = require("../services/course");
 
-  app.get("/courses", (req, res) => {
-    const response = courseService.list();
-    res.status(response.status).json(response);
+  app.get("/courses", async (req, res) => {
+    try {
+      const response = courseService.list();
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
   app.post("/course", function (req, res) {

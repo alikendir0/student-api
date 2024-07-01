@@ -8,16 +8,16 @@ module.exports = {
       "instructors",
       [
         {
-          idNo: "47028060750",
-          instructorno: "INS001",
+          id: "47028060750",
+          instructorNo: "INS001",
           firstName: "Alice",
           lastName: "Smith",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          idNo: "33467246162",
-          instructorno: "INS002",
+          id: "33467246162",
+          instructorNo: "INS002",
           firstName: "Bob",
           lastName: "Johnson",
           createdAt: new Date(),

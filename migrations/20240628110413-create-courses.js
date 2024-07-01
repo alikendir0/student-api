@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("courses", {
-      courseID: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
@@ -19,7 +19,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: "faculties",
-          key: "facultyID",
+          key: "id",
         },
         onDelete: "CASCADE",
       },

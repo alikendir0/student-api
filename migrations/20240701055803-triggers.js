@@ -5,8 +5,8 @@ module.exports = {
       RETURNS TRIGGER AS $$
       BEGIN
         UPDATE sections
-        SET nostudents = nostudents + 1
-        WHERE "sectionID" = NEW."sectionID";
+        SET "noStudents" = "noStudents" + 1
+        WHERE "id" = NEW."id";
         RETURN NEW;
       END;
       $$ LANGUAGE plpgsql;
@@ -22,8 +22,8 @@ module.exports = {
       RETURNS TRIGGER AS $$
       BEGIN
         UPDATE sections
-        SET nostudents = nostudents - 1
-        WHERE "sectionID" = OLD."sectionID";
+        SET "noStudents" = "noStudents" - 1
+        WHERE "id" = OLD."id";
         RETURN OLD;
       END;
       $$ LANGUAGE plpgsql;
@@ -38,8 +38,8 @@ module.exports = {
       CREATE OR REPLACE FUNCTION check_capacity()
       RETURNS TRIGGER AS $$
       BEGIN
-        IF (SELECT nostudents FROM sections WHERE "sectionID" = NEW."sectionID") >= 
-           (SELECT capacity FROM sections WHERE "sectionID" = NEW."sectionID") THEN
+        IF (SELECT "noStudents" FROM sections WHERE "id" = NEW."id") >= 
+           (SELECT "capacity" FROM sections WHERE "id" = NEW."id") THEN
           RAISE EXCEPTION 'Cannot add student to section, section is at capacity';
         END IF;
         RETURN NEW;

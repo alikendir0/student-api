@@ -3,13 +3,13 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("sections", {
-      sectionID: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      coursecode: {
+      courseCode: {
         type: Sequelize.STRING,
         allowNull: false,
         references: {
@@ -30,11 +30,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      instructorno: {
+      instructorNo: {
         type: Sequelize.STRING(6),
         references: {
           model: "instructors",
-          key: "instructorno",
+          key: "instructorNo",
         },
         onDelete: "SET NULL",
       },
@@ -42,7 +42,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      nostudents: {
+      noStudents: {
         type: Sequelize.INTEGER,
       },
       createdAt: {
