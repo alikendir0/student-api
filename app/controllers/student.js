@@ -1,9 +1,15 @@
+const { response } = require("express");
+
 module.exports = function (app) {
   const studentService = require("../services/student");
 
-  app.get("/students", (req, res) => {
-    const response = studentService.list();
-    res.status(response.status).json(response);
+  app.get("/students", async (req, res) => {
+    try {
+      const response = await studentService.list();
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
   app.post("/student", function (req, res) {

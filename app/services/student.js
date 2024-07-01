@@ -2,10 +2,16 @@ const Student = require("../models/student");
 const fileManager = require("../managers/file");
 const { Response, ResponseStatus } = require("../models/response");
 
+const db = require("../../models");
+const dbStudent = db.students;
+
 const studentsPath = "data/students.json";
 
-const list = () => {
-  const students = fileManager.getFile(studentsPath);
+const list = async () => {
+  const data = await dbStudent.findAll({
+    attributes: ["idNo", "firstName", "lastName", "studentno"],
+  });
+  const students = data.map((student) => student.dataValues);
   return new Response(ResponseStatus.SUCCESS, students);
 };
 

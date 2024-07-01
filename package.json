@@ -15,8 +15,14 @@
     "nodemon": "^3.0.3"
   },
   "dependencies": {
+    "@sequelize/core": "^7.0.0-alpha.41",
+    "@sequelize/postgres": "^7.0.0-alpha.41",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2"
   }
 }
