@@ -6,11 +6,9 @@ const dbStudent = db.students;
 const dbCourse = db.studentCourses;
 const dbSection = db.sections;
 
-const studentsPath = "data/students.json";
-
 const list = async () => {
   const data = await dbStudent.findAll({
-    attributes: ["idNo", "firstName", "lastName", "studentno"],
+    attributes: ["id", "firstName", "lastName", "studentNo"],
   });
   const students = data.map((student) => student.dataValues);
   return new Response(ResponseStatus.SUCCESS, students);
@@ -33,10 +31,13 @@ const getCourses = async (id) => {
     const codeData = [];
     for (const d of courseIDs) {
       const section = await dbSection.findByPk(d.sectionID, {
-        attributes: ["courseCode"], // Assuming you want courseCode
+        attributes: ["courseCode"],
       });
       if (section) {
-        codeData.push(section.courseCode); // Assuming you want to push courseCode
+        codeData.push({
+          courseID: d.sectionID,
+          courseCode: section.courseCode,
+        });
       }
     }
     return new Response(ResponseStatus.SUCCESS, codeData);
@@ -53,7 +54,6 @@ const getCourses = async (id) => {
 const del = async (id) => {
   try {
     const student = await dbStudent.findOne({ where: { studentNo: id } });
-    console.log(student);
     if (student) {
       await student.destroy();
       return new Response(ResponseStatus.SUCCESS, null);
@@ -98,30 +98,45 @@ const save = async (data) => {
   }
 };
 
-const reset = (ids) => {
-  var success = [];
-  var failure = [];
-  const students = fileManager.getFile(studentsPath);
+const reset = async (ids) => {
+  const errors = [];
+  const failed = [];
+  const success = [];
 
-  for (const i in ids) {
-    const id = Number(ids[i]);
-    const index = students.findIndex((student) => student.id === id);
-    if (index != -1) {
-      students[index].courses = [];
-      success.push(id);
-    } else {
-      failure.push(id);
+  for (const id of ids) {
+    try {
+      const student = dbStudent.findAll({ where: { studentNo: id } });
+      if (student) {
+        dbCourse.destroy({ where: { studentNo: id } });
+        success.push(id);
+      }
+    } catch (error) {
+      console.error("Error reseting student:", error);
+      errors.push(`Error processing studentID ${id}: ${error.message}`);
+      failed.push(id);
     }
   }
-  fileManager.saveFile(studentsPath, students);
-  if (success.length > 0) {
+  if (errors.length === ids.length) {
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred",
+      errors
+    );
+  }
+  if (errors.length > 0) {
     return new Response(
       ResponseStatus.SUCCESS,
-      `Successful ids:[${success}] Failed ids:[${failure}]`
+      `Successfully reseted ${success}, failed ID(s): ${failed}!`,
+      null,
+      errors
     );
-  } else {
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
   }
+  return new Response(
+    ResponseStatus.SUCCESS,
+    { message: "Student(s) has been reseted successfully." },
+    null
+  );
 };
 
 const assign = async (id, sectionIDs) => {
@@ -163,27 +178,38 @@ const assign = async (id, sectionIDs) => {
   );
 };
 
-const deassign = (studentID, courseCode) => {
-  const students = fileManager.getFile(studentsPath);
-  const index = students.findIndex(
-    (student) => student.id === Number(studentID)
-  );
-  if (index != -1) {
-    const courseIndex = students[index].courses.findIndex(
-      (course) => course === courseCode
-    );
-    if (courseIndex != -1) {
-      students[index].courses.splice(courseIndex, 1);
-      fileManager.saveFile(studentsPath, students);
-      return new Response(ResponseStatus.SUCCESS, `Success!`);
-    } else
+const deassign = async (studentID, sectionCode) => {
+  try {
+    const section = await dbSection.findOne({
+      where: { id: sectionCode },
+    });
+    if (!section) {
       return new Response(
         ResponseStatus.BAD_REQUEST,
         null,
         "Course not found!"
       );
-  } else
-    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
+    }
+    const studentCourse = await dbCourse.findOne({
+      where: { studentNo: studentID, sectionID: sectionCode },
+    });
+    if (!studentCourse) {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student not assigned to course!"
+      );
+    }
+    await studentCourse.destroy();
+    return new Response(ResponseStatus.SUCCESS, null);
+  } catch (error) {
+    console.error("Error deassigning course:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 module.exports = {

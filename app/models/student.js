@@ -1,9 +1,7 @@
 const { ValidationError } = require("./error");
-const Base = require("./base");
 
-class Student extends Base {
+class Student {
   constructor(firstName, lastName, id, studentNo) {
-    super();
     this.firstName = firstName;
     this.lastName = lastName;
     this.id = id;

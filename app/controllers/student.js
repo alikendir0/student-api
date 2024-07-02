@@ -51,14 +51,25 @@ module.exports = function (app) {
     }
   });
 
-  app.delete("/students/delete/courses", (req, res) => {
-    const response = studentService.reset(req.body.ids);
-    res.status(response.status).json(response);
+  app.delete("/students/delete/courses", async (req, res) => {
+    try {
+      const response = await studentService.reset(req.body.ids);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
-  app.delete("/student/delete/course/:id/:code", (req, res) => {
-    const response = studentService.deassign(req.params.id, req.params.code);
-    res.status(response.status).json(response);
+  app.delete("/student/delete/course/:id/:code", async (req, res) => {
+    try {
+      const response = await studentService.deassign(
+        req.params.id,
+        req.params.code
+      );
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
   });
 
   console.log("Student controller initialized...");

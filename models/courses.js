@@ -1,3 +1,5 @@
+const models = require(".");
+
 module.exports = (sequelize, DataTypes) => {
   const Courses = sequelize.define("courses", {
     id: {

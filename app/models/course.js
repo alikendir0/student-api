@@ -1,13 +1,23 @@
 const { ValidationError } = require("./error");
-const Base = require("./base");
 
-class Course extends Base {
-  constructor(code, faculty, time, place, instructor) {
-    super();
-    this.code = code;
+class Course {
+  constructor(
+    courseCode,
+    faculty,
+    hour,
+    day,
+    place,
+    instructor,
+    capacity,
+    noStudents
+  ) {
+    this.courseCode = courseCode;
     this.faculty = faculty;
-    this.time = time;
+    this.hour = hour;
+    this.day = day;
     this.place = place;
+    this.capacity = capacity;
+    this.noStudents = noStudents;
     this.instructor = instructor;
   }
 
@@ -15,10 +25,13 @@ class Course extends Base {
     const validation = this.validate(courseData);
     if (validation === true) {
       return new Course(
-        courseData.code,
+        courseData.courseCode,
         courseData.faculty,
-        courseData.time,
+        courseData.hour,
+        courseData.day,
         courseData.place,
+        courseData.capacity,
+        courseData.noStudents,
         courseData.instructor
       );
     }
@@ -27,13 +40,17 @@ class Course extends Base {
 
   static validate(data) {
     const errors = [];
-
     if (
-      data.code === null ||
-      data.code === "" ||
-      !(typeof data.code === "string")
+      data.courseCode === null ||
+      data.courseCode === "" ||
+      !(typeof data.courseCode === "string")
     ) {
-      errors.push(new ValidationError("Code is not valid or empty", data.code));
+      errors.push(
+        new ValidationError(
+          "Course code is not valid or empty",
+          data.courseCode
+        )
+      );
     }
 
     if (
@@ -47,11 +64,18 @@ class Course extends Base {
     }
 
     if (
-      data.time === null ||
-      data.time === "" ||
-      !(typeof data.time === "string")
+      data.hour === null ||
+      data.hour === "" ||
+      !(typeof data.hour === "string")
     ) {
-      errors.push(new ValidationError("Time is not valid or empty", data.time));
+      errors.push(new ValidationError("Hour is not valid or empty", data.hour));
+    }
+    if (
+      data.day === null ||
+      data.day === "" ||
+      !(typeof data.day === "string")
+    ) {
+      errors.push(new ValidationError("Day is not valid or empty", data.day));
     }
 
     if (
@@ -64,12 +88,59 @@ class Course extends Base {
       );
     }
     if (
-      data.instructor === null ||
-      data.instructor === "" ||
-      !(typeof data.instructor === "string")
+      data.capacity === null ||
+      data.capacity === "" ||
+      !(typeof data.capacity === "number")
     ) {
       errors.push(
-        new ValidationError("Instructor is not valid or empty", data.instructor)
+        new ValidationError("Capacity is not valid or empty", data.capacity)
+      );
+    }
+    if (
+      data.noStudents === null ||
+      data.noStudents === "" ||
+      !(typeof data.noStudents === "number")
+    ) {
+      errors.push(
+        new ValidationError(
+          "Number of students is not valid or empty",
+          data.noStudents
+        )
+      );
+    }
+
+    if (data.noStudents > data.capacity) {
+      errors.push(
+        new ValidationError(
+          "Number of students is greater than capacity",
+          data.noStudents
+        )
+      );
+    }
+
+    if (
+      data.instructor.firstName === null ||
+      data.instructor.firstName === "" ||
+      !(typeof data.instructor.firstName === "string")
+    ) {
+      errors.push(
+        new ValidationError(
+          "Instructor firstname is not valid or empty",
+          data.instructor.firstName
+        )
+      );
+    }
+
+    if (
+      data.instructor.lastName === null ||
+      data.instructor.lastName === "" ||
+      !(typeof data.instructor.lastName === "string")
+    ) {
+      errors.push(
+        new ValidationError(
+          "Instructor lastname is not valid or empty",
+          data.instructor.lastName
+        )
       );
     }
 

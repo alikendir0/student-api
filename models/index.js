@@ -26,4 +26,49 @@ db.sections = require("./sections.js")(sequelize, Sequelize);
 db.studentCourses = require("./studentcourses.js")(sequelize, Sequelize);
 db.faculties = require("./faculties.js")(sequelize, Sequelize);
 
+db.faculties.hasMany(db.courses, {
+  foreignKey: "facultyID",
+  as: "course-faculty",
+});
+db.courses.belongsTo(db.faculties, {
+  foreignKey: "facultyID",
+});
+
+db.students.hasMany(db.studentCourses, {
+  foreignKey: "studentNo",
+  as: "student-course",
+});
+
+db.studentCourses.belongsTo(db.students, {
+  foreignKey: "studentNo",
+});
+
+db.sections.hasMany(db.studentCourses, {
+  foreignKey: "sectionID",
+  as: "section-course",
+});
+
+db.studentCourses.belongsTo(db.sections, {
+  foreignKey: "sectionID",
+});
+
+db.courses.hasMany(db.sections, {
+  foreignKey: "courseCode",
+  sourceKey: "code",
+  as: "courseSections",
+});
+
+db.sections.belongsTo(db.courses, {
+  foreignKey: "courseCode",
+  targetKey: "code",
+});
+
+db.instructors.hasMany(db.sections, {
+  foreignKey: "instructorNo",
+  as: "instructor-sections",
+});
+db.sections.belongsTo(db.instructors, {
+  foreignKey: "instructorNo",
+});
+
 module.exports = db;
