@@ -1,5 +1,3 @@
-const { response } = require("express");
-
 module.exports = function (app) {
   const studentService = require("../services/student");
 
@@ -30,20 +28,20 @@ module.exports = function (app) {
     }
   });
 
-  app.get("/student/courses/:id", async (req, res) => {
+  app.get("/student/sections/:id", async (req, res) => {
     try {
-      const response = await studentService.getCourses(req.params.id);
+      const response = await studentService.getSections(req.params.id);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
     }
   });
 
-  app.post("/student/add/course/:id", async (req, res) => {
+  app.post("/student/add/section/:id", async (req, res) => {
     try {
       const response = await studentService.assign(
         req.params.id,
-        req.body.courses
+        req.body.sections
       );
       res.status(response.status).json(response);
     } catch (error) {
@@ -51,7 +49,7 @@ module.exports = function (app) {
     }
   });
 
-  app.delete("/students/delete/courses", async (req, res) => {
+  app.delete("/students/delete/sections", async (req, res) => {
     try {
       const response = await studentService.reset(req.body.ids);
       res.status(response.status).json(response);
@@ -60,7 +58,7 @@ module.exports = function (app) {
     }
   });
 
-  app.delete("/student/delete/course/:id/:code", async (req, res) => {
+  app.delete("/student/delete/section/:id/:code", async (req, res) => {
     try {
       const response = await studentService.deassign(
         req.params.id,

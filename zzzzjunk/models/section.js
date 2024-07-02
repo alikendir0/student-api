@@ -1,6 +1,6 @@
 const { ValidationError } = require("./error");
 
-class Course {
+class Section {
   constructor(
     courseCode,
     faculty,
@@ -21,18 +21,18 @@ class Course {
     this.instructor = instructor;
   }
 
-  static create(courseData) {
-    const validation = this.validate(courseData);
+  static create(sectionData) {
+    const validation = this.validate(sectionData);
     if (validation === true) {
-      return new Course(
-        courseData.courseCode,
-        courseData.faculty,
-        courseData.hour,
-        courseData.day,
-        courseData.place,
-        courseData.capacity,
-        courseData.noStudents,
-        courseData.instructor
+      return new Section(
+        sectionData.courseCode,
+        sectionData.faculty,
+        sectionData.hour,
+        sectionData.day,
+        sectionData.place,
+        sectionData.capacity,
+        sectionData.noStudents,
+        sectionData.instructor
       );
     }
     return validation;
@@ -47,7 +47,7 @@ class Course {
     ) {
       errors.push(
         new ValidationError(
-          "Course code is not valid or empty",
+          "Section code is not valid or empty",
           data.courseCode
         )
       );
@@ -151,4 +151,4 @@ class Course {
     return true;
   }
 }
-module.exports = Course;
+module.exports = Section;

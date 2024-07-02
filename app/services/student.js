@@ -1,7 +1,6 @@
-const Student = require("../models/student");
 const { Response, ResponseStatus } = require("../models/response");
 
-const db = require("../../models");
+const db = require("../models");
 const dbStudent = db.students;
 const dbCourse = db.studentCourses;
 const dbSection = db.sections;
@@ -14,7 +13,7 @@ const list = async () => {
   return new Response(ResponseStatus.SUCCESS, students);
 };
 
-const getCourses = async (id) => {
+const getSections = async (id) => {
   try {
     const data = await dbCourse.findAll({
       where: { studentNo: id },
@@ -27,22 +26,22 @@ const getCourses = async (id) => {
         "Student not found!"
       );
     }
-    const courseIDs = data.map((data) => data.dataValues);
+    const sectionIDs = data.map((data) => data.dataValues);
     const codeData = [];
-    for (const d of courseIDs) {
+    for (const d of sectionIDs) {
       const section = await dbSection.findByPk(d.sectionID, {
         attributes: ["courseCode"],
       });
       if (section) {
         codeData.push({
-          courseID: d.sectionID,
+          sectionID: d.sectionID,
           courseCode: section.courseCode,
         });
       }
     }
     return new Response(ResponseStatus.SUCCESS, codeData);
   } catch (error) {
-    console.error("Error fetching courses for student:", error);
+    console.error("Error fetching sections for student:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
@@ -76,18 +75,8 @@ const del = async (id) => {
 
 const save = async (data) => {
   try {
-    const student = Student.create(data);
-    console.log(data);
-    if (student instanceof Student) {
-      await dbStudent.create(student);
-      return new Response(ResponseStatus.CREATED, student);
-    } else {
-      return new Response(
-        ResponseStatus.BAD_REQUEST,
-        student,
-        "Invalid student data"
-      );
-    }
+    const student = await dbStudent.create(data);
+    return new Response(ResponseStatus.CREATED, student);
   } catch (error) {
     console.error("Error saving student:", error);
     return new Response(
@@ -187,7 +176,7 @@ const deassign = async (studentID, sectionCode) => {
       return new Response(
         ResponseStatus.BAD_REQUEST,
         null,
-        "Course not found!"
+        "Section not found!"
       );
     }
     const studentCourse = await dbCourse.findOne({
@@ -197,13 +186,13 @@ const deassign = async (studentID, sectionCode) => {
       return new Response(
         ResponseStatus.BAD_REQUEST,
         null,
-        "Student not assigned to course!"
+        "Student not assigned to section!"
       );
     }
     await studentCourse.destroy();
     return new Response(ResponseStatus.SUCCESS, null);
   } catch (error) {
-    console.error("Error deassigning course:", error);
+    console.error("Error deassigning section:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
@@ -214,7 +203,7 @@ const deassign = async (studentID, sectionCode) => {
 
 module.exports = {
   list,
-  getCourses,
+  getSections,
   del,
   save,
   reset,

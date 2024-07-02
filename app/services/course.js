@@ -1,54 +1,36 @@
-const Course = require("../models/course");
-const fileManager = require("../managers/file");
+const db = require("../models");
+const dbCourses = db.courses;
 const { Response, ResponseStatus } = require("../models/response");
-const db = require("../../models");
-const {
-  attribute,
-} = require("@sequelize/core/_non-semver-use-at-your-own-risk_/expression-builders/attribute.js");
-const dbCourse = db.courses;
-const dbSection = db.sections;
-const dbInstructor = db.instructors;
-
-const coursesPath = "data/courses.json";
 
 const list = async () => {
-  const coursesWithFaculties = await db.sections.findAll({
-    include: [
-      {
-        model: db.courses,
-        required: true,
-        attributes: ["code"],
-        include: [
-          {
-            model: db.faculties,
-            required: true,
-            attributes: ["name"],
-          },
-        ],
-      },
-      {
-        model: db.instructors,
-        required: true,
-        attributes: ["firstName", "lastName"],
-      },
-    ],
-    attributes: ["id", "day", "hour", "place", "capacity", "noStudents"],
+  const data = await dbCourses.findAll({
+    attributes: ["code"],
   });
-  const data = coursesWithFaculties.map((section) => ({
-    ...section.dataValues,
-    courseCode: section.course.dataValues.code,
-    instructor: {
-      firstName: section.instructor.dataValues.firstName,
-      lastName: section.instructor.dataValues.lastName,
-    },
-    faculty: section.course.faculty.dataValues.name,
-  }));
-  return new Response(ResponseStatus.SUCCESS, data);
+  const courses = data.map((course) => course.dataValues);
+  return new Response(ResponseStatus.SUCCESS, courses);
+};
+
+const getFromName = async (id) => {
+  try {
+    const data = await dbCourses.findAll({
+      where: { facultyID: id },
+      attributes: ["code"],
+    });
+    const courses = data.map((course) => course.dataValues);
+    return new Response(ResponseStatus.SUCCESS, courses);
+  } catch (error) {
+    console.error("Error fetching courses for faculty:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 const get = async (id) => {
   try {
-    const course = await dbSection.findOne({ where: { id: id } });
+    const course = await dbCourses.findOne({ where: { code: id } });
     if (course) {
       return new Response(ResponseStatus.SUCCESS, course);
     } else {
@@ -66,7 +48,7 @@ const get = async (id) => {
 
 const del = async (id) => {
   try {
-    const course = await dbSection.findOne({ where: { id: id } });
+    const course = await dbCourses.findOne({ where: { code: id } });
     if (course) {
       await course.destroy();
       return new Response(ResponseStatus.SUCCESS, null);
@@ -85,32 +67,8 @@ const del = async (id) => {
 
 const save = async (data) => {
   try {
-    const course = Course.create(data);
-    const instructor = await dbInstructor.findOne({
-      where: {
-        firstName: data.instructor.firstName,
-        lastName: data.instructor.lastName,
-      },
-      attributes: ["instructorNo"],
-    });
-    if (!instructor) {
-      return new Response(
-        ResponseStatus.BAD_REQUEST,
-        null,
-        "Instructor not found"
-      );
-    }
-    data.instructorNo = instructor.instructorNo;
-    if (course instanceof Course) {
-      await dbSection.create(data);
-      return new Response(ResponseStatus.CREATED, course);
-    } else {
-      return new Response(
-        ResponseStatus.BAD_REQUEST,
-        course,
-        "Invalid course data"
-      );
-    }
+    const course = await dbCourses.create(data);
+    return new Response(ResponseStatus.SUCCESS, course);
   } catch (error) {
     console.error("Error saving course:", error);
     return new Response(
@@ -123,6 +81,7 @@ const save = async (data) => {
 
 module.exports = {
   list,
+  getFromName,
   get,
   del,
   save,
