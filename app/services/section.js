@@ -1,5 +1,5 @@
 const { Response, ResponseStatus } = require("../models/response");
-const db = require("../models");
+const db = require("../managers");
 const dbSection = db.sections;
 const dbInstructor = db.instructors;
 

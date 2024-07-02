@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require("../managers");
 const dbCourses = db.courses;
 const { Response, ResponseStatus } = require("../models/response");
 

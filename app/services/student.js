@@ -1,6 +1,6 @@
 const { Response, ResponseStatus } = require("../models/response");
 
-const db = require("../models");
+const db = require("../managers");
 const dbStudent = db.students;
 const dbCourse = db.studentCourses;
 const dbSection = db.sections;

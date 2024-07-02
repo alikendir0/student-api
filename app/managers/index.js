@@ -19,12 +19,15 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.students = require("./students.js")(sequelize, Sequelize);
-db.instructors = require("./instructors.js")(sequelize, Sequelize);
-db.courses = require("./courses.js")(sequelize, Sequelize);
-db.sections = require("./sections.js")(sequelize, Sequelize);
-db.studentCourses = require("./studentcourses.js")(sequelize, Sequelize);
-db.faculties = require("./faculties.js")(sequelize, Sequelize);
+db.students = require("../models/students.js")(sequelize, Sequelize);
+db.instructors = require("../models/instructors.js")(sequelize, Sequelize);
+db.courses = require("../models/courses.js")(sequelize, Sequelize);
+db.sections = require("../models/sections.js")(sequelize, Sequelize);
+db.studentCourses = require("../models/studentcourses.js")(
+  sequelize,
+  Sequelize
+);
+db.faculties = require("../models/faculties.js")(sequelize, Sequelize);
 
 db.faculties.hasMany(db.courses, {
   foreignKey: "facultyID",
