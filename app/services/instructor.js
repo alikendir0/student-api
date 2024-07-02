@@ -1,5 +1,6 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
+const instructor = require("../controllers/instructor");
 const dbInstructor = db.instructors;
 
 const list = async () => {
@@ -12,7 +13,9 @@ const list = async () => {
 
 const get = async (id) => {
   try {
-    const instructor = await dbInstructor.findOne({ where: { id: id } });
+    const instructor = await dbInstructor.findOne({
+      where: { instructorNo: id },
+    });
     if (instructor) {
       return new Response(ResponseStatus.SUCCESS, instructor);
     } else {
@@ -34,7 +37,9 @@ const get = async (id) => {
 
 const del = async (id) => {
   try {
-    const instructor = await dbInstructor.findOne({ where: { id: id } });
+    const instructor = await dbInstructor.findOne({
+      where: { instructorNo: id },
+    });
     if (instructor) {
       await instructor.destroy();
       return new Response(ResponseStatus.SUCCESS, null);

@@ -30,7 +30,25 @@ const getFromName = async (id) => {
 
 const get = async (id) => {
   try {
-    const course = await dbCourses.findOne({ where: { code: id } });
+    const course = await dbCourses.findOne({ where: { id: id } });
+    if (course) {
+      return new Response(ResponseStatus.SUCCESS, course);
+    } else {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
+    }
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
+const getFromCode = async (code) => {
+  try {
+    const course = await dbCourses.findOne({ where: { code: code } });
     if (course) {
       return new Response(ResponseStatus.SUCCESS, course);
     } else {
@@ -48,7 +66,7 @@ const get = async (id) => {
 
 const del = async (id) => {
   try {
-    const course = await dbCourses.findOne({ where: { code: id } });
+    const course = await dbCourses.findOne({ where: { id: id } });
     if (course) {
       await course.destroy();
       return new Response(ResponseStatus.SUCCESS, null);
@@ -82,6 +100,7 @@ const save = async (data) => {
 module.exports = {
   list,
   getFromName,
+  getFromCode,
   get,
   del,
   save,

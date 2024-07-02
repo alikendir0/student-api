@@ -10,9 +10,18 @@ module.exports = function (app) {
     }
   });
 
-  app.get("/course/:id", async (req, res) => {
+  app.get("/course/id/:id", async (req, res) => {
     try {
       const response = await courseService.get(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
+  app.get("/course/code/:code", async (req, res) => {
+    try {
+      const response = await courseService.getFromCode(req.params.code);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
