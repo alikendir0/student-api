@@ -14,7 +14,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          studentNo: "654321",
+          studentNo: "543678",
           sectionID: 2,
           createdAt: new Date(),
           updatedAt: new Date(),

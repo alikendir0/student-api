@@ -9,7 +9,7 @@ module.exports = {
       [
         {
           id: "47028060750",
-          instructorNo: "INS001",
+          instructorNo: "373289",
           firstName: "Alice",
           lastName: "Smith",
           createdAt: new Date(),
@@ -17,7 +17,7 @@ module.exports = {
         },
         {
           id: "33467246162",
-          instructorNo: "INS002",
+          instructorNo: "432789",
           firstName: "Bob",
           lastName: "Johnson",
           createdAt: new Date(),

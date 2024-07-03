@@ -8,12 +8,32 @@ module.exports = {
       "faculties",
       [
         {
-          name: "Engineering",
+          name: "Mühendislik Fakültesi",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          name: "Science",
+          name: "Temel Bilimler Fakültesi",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Eğitim Fakültesi",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Fen-Edebiyat Fakültesi",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "İktisadi ve İdari Bilimler Fakültesi",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Mimarlık ve Tasarım Fakültesi",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

@@ -9,13 +9,19 @@ module.exports = {
       [
         {
           code: "HIST101",
-          facultyID: 1,
+          facultyID: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           code: "HIST102",
           facultyID: 2,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          code: "CS101",
+          facultyID: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
