@@ -3,11 +3,28 @@ const db = require("../managers");
 const dbFaculty = db.faculties;
 
 const list = async () => {
-  const data = await dbFaculty.findAll({
-    attributes: ["id", "name"],
-  });
-  const faculties = data.map((faculty) => faculty.dataValues);
-  return new Response(ResponseStatus.SUCCESS, faculties);
+  try {
+    const data = await dbFaculty.findAll({
+      attributes: ["id", "name"],
+    });
+    if (data) {
+      const faculties = data.map((faculty) => faculty.dataValues);
+      return new Response(ResponseStatus.SUCCESS, faculties);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Faculties not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching faculties:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 const get = async (id) => {
@@ -58,13 +75,21 @@ const del = async (id) => {
 const save = async (data) => {
   try {
     const faculty = await dbFaculty.create(data);
-    return new Response(ResponseStatus.SUCCESS, faculty);
+    if (faculty) {
+      return new Response(ResponseStatus.CREATED, faculty);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Faculty not saved"
+      );
+    }
   } catch (error) {
     console.error("Error saving faculty:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };

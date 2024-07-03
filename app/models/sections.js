@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER,
+      validate: {
+        isInt: { args: true, msg: "ID must be an integer" },
+      },
     },
     courseCode: {
       type: DataTypes.STRING,
@@ -15,18 +18,50 @@ module.exports = (sequelize, DataTypes) => {
         key: "code",
       },
       onDelete: "CASCADE",
+      validate: {
+        isAlphanumeric: {
+          args: true,
+          msg: "Code must only contain letters and numbers",
+        },
+        len: {
+          args: [3, 8],
+          msg: "Code must be between 3 and 8 characters",
+        },
+      },
     },
     day: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isIn: {
+          args: [["M", "T", "W", "TH", "F"]],
+          msg: "Day must be M, T, W, TH, or F",
+        },
+      },
     },
     hour: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        is: {
+          args: [/^\d{2}:\d{2}-\d{2}:\d{2}$/],
+          msg: "Hour must be in the format HH:MM-HH:MM",
+        },
+      },
     },
     place: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        isAlphanumeric: {
+          args: true,
+          msg: "Place must only contain letters and numbers",
+        },
+        len: {
+          args: [3, 32],
+          msg: "Place must be between 3 and 32 characters",
+        },
+      },
     },
     instructorNo: {
       type: DataTypes.STRING(6),
@@ -39,9 +74,21 @@ module.exports = (sequelize, DataTypes) => {
     capacity: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        isInt: { args: true, msg: "Capacity must be an integer" },
+      },
     },
     noStudents: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: { args: true, msg: "Number of students must be an integer" },
+        async noStudentsLessThanCapacity(value) {
+          if (this.capacity && value > this.capacity) {
+            throw new Error("Number of students cannot exceed capacity");
+          }
+        },
+      },
     },
     createdAt: {
       allowNull: false,

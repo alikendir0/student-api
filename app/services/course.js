@@ -1,13 +1,30 @@
+const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
 const dbCourses = db.courses;
-const { Response, ResponseStatus } = require("../models/response");
 
 const list = async () => {
-  const data = await dbCourses.findAll({
-    attributes: ["code"],
-  });
-  const courses = data.map((course) => course.dataValues);
-  return new Response(ResponseStatus.SUCCESS, courses);
+  try {
+    const data = await dbCourses.findAll({
+      attributes: ["code"],
+    });
+    if (data) {
+      const courses = data.map((course) => course.dataValues);
+      return new Response(ResponseStatus.SUCCESS, courses);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Courses not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 const getFromName = async (id) => {
@@ -16,8 +33,16 @@ const getFromName = async (id) => {
       where: { facultyID: id },
       attributes: ["code"],
     });
-    const courses = data.map((course) => course.dataValues);
-    return new Response(ResponseStatus.SUCCESS, courses);
+    if (data) {
+      const courses = data.map((course) => course.dataValues);
+      return new Response(ResponseStatus.SUCCESS, courses);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Courses not found"
+      );
+    }
   } catch (error) {
     console.error("Error fetching courses for faculty:", error);
     return new Response(
@@ -86,13 +111,17 @@ const del = async (id) => {
 const save = async (data) => {
   try {
     const course = await dbCourses.create(data);
-    return new Response(ResponseStatus.SUCCESS, course);
+    if (course) {
+      return new Response(ResponseStatus.SUCCESS, course);
+    } else {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Unable to create");
+    }
   } catch (error) {
     console.error("Error saving course:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };

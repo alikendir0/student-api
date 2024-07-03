@@ -2,6 +2,7 @@ const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
 const dbSection = db.sections;
 const dbInstructor = db.instructors;
+const dbCourse = db.courses;
 
 const list = async () => {
   const sectionsWithFaculties = await db.sections.findAll({
@@ -99,15 +100,20 @@ const save = async (data) => {
         "Instructor not found"
       );
     }
+    const code = dbCourse.findOne({
+      where: { code: data.course.code },
+    });
+    if (!code) {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
+    }
     data.instructorNo = instructor.instructorNo;
     const section = await dbSection.create(data);
     return new Response(ResponseStatus.CREATED, section);
   } catch (error) {
-    console.error("Error saving section:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };

@@ -1,11 +1,10 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
-const instructor = require("../controllers/instructor");
 const dbInstructor = db.instructors;
 
 const list = async () => {
   const data = await dbInstructor.findAll({
-    attributes: ["id", "firstName", "lastName"],
+    attributes: ["id", "firstName", "lastName", "instructorNo"],
   });
   const instructors = data.map((instructor) => instructor.dataValues);
   return new Response(ResponseStatus.SUCCESS, instructors);
@@ -51,25 +50,23 @@ const del = async (id) => {
       );
     }
   } catch (error) {
-    console.error("Error deleting instructor:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };
 
 const save = async (data) => {
   try {
-    const instructor = dbInstructor.create(data);
+    const instructor = await dbInstructor.create(data);
     return new Response(ResponseStatus.SUCCESS, instructor);
   } catch (error) {
-    console.error("Error saving instructor:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };

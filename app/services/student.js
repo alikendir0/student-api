@@ -75,6 +75,27 @@ const del = async (id) => {
 
 const save = async (data) => {
   try {
+    const existingID = await dbStudent.findOne({
+      where: { id: data.id },
+    });
+    if (existingID) {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student ID already exists!"
+      );
+    }
+    const existingNo = await dbStudent.findOne({
+      where: { studentNo: data.studentNo },
+    });
+
+    if (existingNo) {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student number already exists!"
+      );
+    }
     const student = await dbStudent.create(data);
     return new Response(ResponseStatus.CREATED, student);
   } catch (error) {
@@ -82,7 +103,7 @@ const save = async (data) => {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.message
     );
   }
 };

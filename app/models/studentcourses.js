@@ -1,3 +1,5 @@
+const validator = require("./validators.js");
+
 module.exports = (sequelize, DataTypes) => {
   const studentCourses = sequelize.define(
     "studentcourses",
@@ -7,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
         type: DataTypes.INTEGER,
+        validate: {
+          isInt: { args: true, msg: "ID must be an integer" },
+        },
       },
       studentNo: {
         type: DataTypes.STRING(11),
@@ -16,6 +21,13 @@ module.exports = (sequelize, DataTypes) => {
           key: "studentNo",
         },
         onDelete: "CASCADE",
+        validate: {
+          isValidNo(value) {
+            if (!validator.isValidNo(value)) {
+              throw new Error("Invalid student number");
+            }
+          },
+        },
       },
       sectionID: {
         type: DataTypes.INTEGER,
@@ -25,6 +37,9 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
         onDelete: "CASCADE",
+        validate: {
+          isInt: { args: true, msg: "Section ID must be an integer" },
+        },
       },
       createdAt: {
         allowNull: false,

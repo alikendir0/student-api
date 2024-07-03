@@ -1,3 +1,5 @@
+const validator = require("./validators.js");
+
 module.exports = (sequelize, DataTypes) => {
   const Courses = sequelize.define("courses", {
     id: {
@@ -5,11 +7,24 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER,
+      validate: {
+        isInt: { args: true, msg: "ID must be an integer" },
+      },
     },
     code: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
+      validate: {
+        isAlphanumeric: {
+          args: true,
+          msg: "Code must only contain letters and numbers",
+        },
+        len: {
+          args: [3, 8],
+          msg: "Code must be between 3 and 8 characters",
+        },
+      },
     },
     facultyID: {
       type: DataTypes.INTEGER,
@@ -19,6 +34,9 @@ module.exports = (sequelize, DataTypes) => {
         key: "id",
       },
       onDelete: "CASCADE",
+      validate: {
+        isInt: { args: true, msg: "Faculty ID must be an integer" },
+      },
     },
     createdAt: {
       allowNull: false,
