@@ -13,13 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isAlpha: {
-          args: true,
-          msg: "Name must only contain letters",
-        },
         len: {
-          args: [3, 32],
-          msg: "Name must be between 3 and 32 characters",
+          args: [3, 64],
+          msg: "Name must be between 3 and 64 characters",
         },
       },
     },
