@@ -1,14 +1,26 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
 const dbCourses = db.courses;
+const dbFaculty = db.faculties;
 
 const list = async () => {
   try {
     const data = await dbCourses.findAll({
-      attributes: ["code"],
+      attributes: ["id", "code"],
+      include: [
+        {
+          model: dbFaculty,
+          attributes: ["name"],
+          as: "faculty",
+        },
+      ],
     });
     if (data) {
-      const courses = data.map((course) => course.dataValues);
+      const courses = data.map((course) => ({
+        id: course.id,
+        code: course.code,
+        facultyName: course.faculty.name,
+      }));
       return new Response(ResponseStatus.SUCCESS, courses);
     } else {
       return new Response(

@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         len: {
           args: [3, 32],
-          msg: "First name must be between 2 and 32 characters",
+          msg: "First name must be between 3 and 32 characters",
         },
       },
     },

@@ -1,7 +1,7 @@
 module.exports = function (app) {
   const courseService = require("../services/course");
 
-  app.get("/courses/all", async (req, res) => {
+  app.get("/courses", async (req, res) => {
     try {
       const response = await courseService.list();
       res.status(response.status).json(response);

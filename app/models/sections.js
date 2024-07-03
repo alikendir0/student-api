@@ -84,7 +84,9 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         isInt: { args: true, msg: "Number of students must be an integer" },
         async noStudentsLessThanCapacity(value) {
-          if (this.capacity && value > this.capacity) {
+          const intValue = parseInt(value, 10);
+          const intCapacity = parseInt(this.capacity, 10);
+          if (intValue > intCapacity) {
             throw new Error("Number of students cannot exceed capacity");
           }
         },

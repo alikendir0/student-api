@@ -100,8 +100,9 @@ const save = async (data) => {
         "Instructor not found"
       );
     }
+
     const code = dbCourse.findOne({
-      where: { code: data.course.code },
+      where: { code: data.courseCode },
     });
     if (!code) {
       return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
