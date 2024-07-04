@@ -54,6 +54,18 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
+    facultyID: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      references: {
+        model: "faculties",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      validate: {
+        isInt: { args: true, msg: "Faculty ID must be an integer" },
+      },
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,

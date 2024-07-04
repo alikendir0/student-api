@@ -1,8 +1,10 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
+const room = require("../controllers/room");
 const dbSection = db.sections;
 const dbInstructor = db.instructors;
 const dbCourse = db.courses;
+const dbRoom = db.rooms;
 
 const list = async () => {
   const sectionsWithFaculties = await db.sections.findAll({
@@ -25,7 +27,7 @@ const list = async () => {
         attributes: ["firstName", "lastName"],
       },
     ],
-    attributes: ["id", "day", "hour", "place", "capacity", "noStudents"],
+    attributes: ["id", "day", "hour", "capacity", "noStudents"],
   });
   const data = sectionsWithFaculties.map((section) => ({
     ...section.dataValues,
@@ -88,10 +90,8 @@ const save = async (data) => {
   try {
     const instructor = await dbInstructor.findOne({
       where: {
-        firstName: data.instructor.firstName,
-        lastName: data.instructor.lastName,
+        instructorNo: data.instructorNo,
       },
-      attributes: ["instructorNo"],
     });
     if (!instructor) {
       return new Response(
@@ -100,12 +100,17 @@ const save = async (data) => {
         "Instructor not found"
       );
     }
-
-    const code = dbCourse.findOne({
+    const code = await dbCourse.findOne({
       where: { code: data.courseCode },
     });
     if (!code) {
       return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
+    }
+    const room = await dbRoom.findOne({
+      where: { code: data.roomNo },
+    });
+    if (!room) {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Room not found");
     }
     data.instructorNo = instructor.instructorNo;
     const section = await dbSection.create(data);
@@ -114,7 +119,7 @@ const save = async (data) => {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      error.message
+      error.errors[0].message
     );
   }
 };

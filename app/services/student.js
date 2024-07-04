@@ -2,7 +2,7 @@ const { Response, ResponseStatus } = require("../models/response");
 
 const db = require("../managers");
 const dbStudent = db.students;
-const dbCourse = db.studentCourses;
+const dbStudentCourses = db.studentCourses;
 const dbSection = db.sections;
 
 const list = async () => {
@@ -15,7 +15,7 @@ const list = async () => {
 
 const getSections = async (id) => {
   try {
-    const data = await dbCourse.findAll({
+    const data = await dbStudentCourses.findAll({
       where: { studentNo: id },
       attributes: ["sectionID"],
     });
@@ -117,7 +117,7 @@ const reset = async (ids) => {
     try {
       const student = dbStudent.findAll({ where: { studentNo: id } });
       if (student) {
-        dbCourse.destroy({ where: { studentNo: id } });
+        dbStudentCourses.destroy({ where: { studentNo: id } });
         success.push(id);
       }
     } catch (error) {
@@ -155,7 +155,7 @@ const assign = async (id, sectionIDs) => {
   const success = [];
   for (const sectionID of sectionIDs) {
     try {
-      await dbCourse.create({
+      await dbStudentCourses.create({
         studentNo: id,
         sectionID: sectionID,
       });
@@ -168,16 +168,15 @@ const assign = async (id, sectionIDs) => {
   if (errors.length === sectionIDs.length) {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
-      null,
-      "An error occurred",
-      errors
+      errors,
+      "An error occurred"
     );
   }
+
   if (errors.length > 0) {
     return new Response(
       ResponseStatus.SUCCESS,
       `Successfully added ${success}, failed ID(s): ${failed}!`,
-      null,
       errors
     );
   }
@@ -200,7 +199,7 @@ const deassign = async (studentID, sectionCode) => {
         "Section not found!"
       );
     }
-    const studentCourse = await dbCourse.findOne({
+    const studentCourse = await dbStudentCourses.findOne({
       where: { studentNo: studentID, sectionID: sectionCode },
     });
     if (!studentCourse) {

@@ -21,6 +21,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
+      facultyID: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "faculties",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

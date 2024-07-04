@@ -12,7 +12,7 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER increment_nostudents_trigger
-      AFTER INSERT ON studentcourses
+      AFTER INSERT ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION update_nostudents();
     `);
@@ -29,7 +29,7 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER decrement_nostudents_trigger
-      AFTER DELETE ON studentcourses
+      AFTER DELETE ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION decrement_nostudents();
     `);
@@ -47,7 +47,7 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER check_capacity_trigger
-      BEFORE INSERT ON studentcourses
+      BEFORE INSERT ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION check_capacity();
     `);
