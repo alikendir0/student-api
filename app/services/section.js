@@ -1,6 +1,5 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
-const room = require("../controllers/room");
 const dbSection = db.sections;
 const dbInstructor = db.instructors;
 const dbCourse = db.courses;
@@ -27,7 +26,7 @@ const list = async () => {
         attributes: ["firstName", "lastName"],
       },
     ],
-    attributes: ["id", "day", "hour", "capacity", "noStudents"],
+    attributes: ["id", "day", "roomNo", "hour", "capacity", "noStudents"],
   });
   const data = sectionsWithFaculties.map((section) => ({
     ...section.dataValues,
@@ -103,6 +102,7 @@ const save = async (data) => {
     const code = await dbCourse.findOne({
       where: { code: data.courseCode },
     });
+
     if (!code) {
       return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
     }

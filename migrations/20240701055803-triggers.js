@@ -35,6 +35,23 @@ module.exports = {
     `);
 
     await queryInterface.sequelize.query(`
+      CREATE OR REPLACE FUNCTION decrement_nostudents_on_student_delete()
+      RETURNS TRIGGER AS $$
+      BEGIN
+      UPDATE sections
+      SET "noStudents" = "noStudents" - 1
+      WHERE "id" IN (SELECT "sectionID" FROM studentsections WHERE "studentNo" = OLD."studentNo");
+      RETURN OLD;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER decrement_nostudents_on_student_delete_trigger
+      AFTER DELETE ON students
+      FOR EACH ROW
+     EXECUTE FUNCTION decrement_nostudents_on_student_delete();
+    `);
+
+    await queryInterface.sequelize.query(`
       CREATE OR REPLACE FUNCTION check_capacity()
       RETURNS TRIGGER AS $$
       BEGIN

@@ -78,9 +78,23 @@ const save = async (data) => {
   }
 };
 
+const getByFaculty = async (facultyID) => {
+  const data = await dbInstructor.findAll({
+    where: { facultyID: facultyID },
+    attributes: ["id", "firstName", "lastName", "instructorNo", "facultyID"],
+  });
+  const instructors = data.map((instructor) => instructor.dataValues);
+  for (const instructor of instructors) {
+    const faculty = await dbFaculty.findByPk(instructor.facultyID);
+    instructor.facultyName = faculty.dataValues.name;
+  }
+  return new Response(ResponseStatus.SUCCESS, instructors);
+};
+
 module.exports = {
   list,
   get,
   del,
   save,
+  getByFaculty,
 };
