@@ -36,4 +36,13 @@ module.exports = function (app) {
       res.status(500).json(error);
     }
   });
+
+  app.get("/instructors/faculty/:id", async (req, res) => {
+    try {
+      const response = await instructorService.getByFaculty(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
 };

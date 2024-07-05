@@ -1,12 +1,19 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
 const dbInstructor = db.instructors;
+const dbFaculty = db.faculties;
 
 const list = async () => {
   const data = await dbInstructor.findAll({
-    attributes: ["id", "firstName", "lastName", "instructorNo"],
+    attributes: ["id", "firstName", "lastName", "instructorNo", "facultyID"],
   });
   const instructors = data.map((instructor) => instructor.dataValues);
+
+  for (const instructor of instructors) {
+    const faculty = await dbFaculty.findByPk(instructor.facultyID);
+    instructor.facultyName = faculty.dataValues.name;
+  }
+
   return new Response(ResponseStatus.SUCCESS, instructors);
 };
 
@@ -66,9 +73,22 @@ const save = async (data) => {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      error.message
+      error.errors[0].message
     );
   }
+};
+
+const getByFaculty = async (facultyID) => {
+  const data = await dbInstructor.findAll({
+    where: { facultyID: facultyID },
+    attributes: ["id", "firstName", "lastName", "instructorNo", "facultyID"],
+  });
+  const instructors = data.map((instructor) => instructor.dataValues);
+  for (const instructor of instructors) {
+    const faculty = await dbFaculty.findByPk(instructor.facultyID);
+    instructor.facultyName = faculty.dataValues.name;
+  }
+  return new Response(ResponseStatus.SUCCESS, instructors);
 };
 
 module.exports = {
@@ -76,4 +96,5 @@ module.exports = {
   get,
   del,
   save,
+  getByFaculty,
 };

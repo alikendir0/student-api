@@ -2,7 +2,7 @@ const validator = require("./validators.js");
 
 module.exports = (sequelize, DataTypes) => {
   const studentCourses = sequelize.define(
-    "studentcourses",
+    "studentsections",
     {
       id: {
         allowNull: false,

@@ -1,5 +1,3 @@
-// seeders/20240629100000-demo-student.js
-
 "use strict";
 
 module.exports = {
@@ -28,6 +26,31 @@ module.exports = {
           studentNo: "543678",
           firstName: "Mustafa Kemal",
           lastName: "Atatürk",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "31344574810",
+          studentNo: "123789",
+          firstName: "Kemal",
+          lastName: "Kemal",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+
+        {
+          id: "59754712516",
+          studentNo: "723789",
+          firstName: "Kemal",
+          lastName: "Kemalettin",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: "17571477100",
+          studentNo: "125789",
+          firstName: "Kemal",
+          lastName: "ettin",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

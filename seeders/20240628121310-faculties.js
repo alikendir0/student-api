@@ -1,5 +1,4 @@
-// seeders/20240629102000-demo-faculty.js
-
+// seeders/[timestamp]-faculties.js
 "use strict";
 
 module.exports = {
@@ -9,11 +8,6 @@ module.exports = {
       [
         {
           name: "Mühendislik Fakültesi",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          name: "Temel Bilimler Fakültesi",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -33,7 +27,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          name: "Mimarlık ve Tasarım Fakültesi",
+          name: "Temel Bilimler Fakültesi",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

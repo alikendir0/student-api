@@ -12,7 +12,7 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER increment_nostudents_trigger
-      AFTER INSERT ON studentcourses
+      AFTER INSERT ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION update_nostudents();
     `);
@@ -29,9 +29,26 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER decrement_nostudents_trigger
-      AFTER DELETE ON studentcourses
+      AFTER DELETE ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION decrement_nostudents();
+    `);
+
+    await queryInterface.sequelize.query(`
+      CREATE OR REPLACE FUNCTION decrement_nostudents_on_student_delete()
+      RETURNS TRIGGER AS $$
+      BEGIN
+      UPDATE sections
+      SET "noStudents" = "noStudents" - 1
+      WHERE "id" IN (SELECT "sectionID" FROM studentsections WHERE "studentNo" = OLD."studentNo");
+      RETURN OLD;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER decrement_nostudents_on_student_delete_trigger
+      AFTER DELETE ON students
+      FOR EACH ROW
+     EXECUTE FUNCTION decrement_nostudents_on_student_delete();
     `);
 
     await queryInterface.sequelize.query(`
@@ -47,7 +64,7 @@ module.exports = {
       $$ LANGUAGE plpgsql;
 
       CREATE TRIGGER check_capacity_trigger
-      BEFORE INSERT ON studentcourses
+      BEFORE INSERT ON studentsections
       FOR EACH ROW
       EXECUTE FUNCTION check_capacity();
     `);

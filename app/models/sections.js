@@ -49,25 +49,19 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
-    place: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isAlphanumeric: {
-          args: true,
-          msg: "Place must only contain letters and numbers",
-        },
-        len: {
-          args: [3, 32],
-          msg: "Place must be between 3 and 32 characters",
-        },
-      },
-    },
     instructorNo: {
       type: DataTypes.STRING(6),
       references: {
         model: "instructor",
         key: "instructorNo",
+      },
+      onDelete: "SET NULL",
+    },
+    roomNo: {
+      type: DataTypes.STRING,
+      references: {
+        model: "rooms",
+        key: "code",
       },
       onDelete: "SET NULL",
     },

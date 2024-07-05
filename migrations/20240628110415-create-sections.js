@@ -26,15 +26,19 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      place: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       instructorNo: {
         type: Sequelize.STRING(6),
         references: {
           model: "instructors",
           key: "instructorNo",
+        },
+        onDelete: "SET NULL",
+      },
+      roomNo: {
+        type: Sequelize.STRING,
+        references: {
+          model: "rooms",
+          key: "code",
         },
         onDelete: "SET NULL",
       },

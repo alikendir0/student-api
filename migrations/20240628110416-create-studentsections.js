@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("studentcourses", {
+    await queryInterface.createTable("studentsections", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -37,7 +37,7 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint("studentcourses", {
+    await queryInterface.addConstraint("studentsections", {
       fields: ["studentNo", "sectionID"],
       type: "unique",
       name: "unique_student_course",
@@ -45,6 +45,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("studentcourses");
+    await queryInterface.dropTable("studentsections");
   },
 };
