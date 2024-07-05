@@ -153,13 +153,33 @@ const assign = async (id, sectionIDs) => {
   const errors = [];
   const failed = [];
   const success = [];
+  const successCourse = [];
+  const studentSections = await getSections(id);
+  const existingCourses = studentSections.data.map(
+    (section) => section.courseCode
+  );
   for (const sectionID of sectionIDs) {
     try {
+      const courseName = await dbSection.findOne({
+        where: { id: sectionID },
+        attributes: ["courseCode"],
+      });
+      if (
+        existingCourses.includes(courseName.dataValues.courseCode) ||
+        successCourse.includes(courseName.dataValues.courseCode)
+      ) {
+        errors.push(
+          `Error processing sectionID ${sectionID}: Student already assigned to this course`
+        );
+        failed.push(sectionID);
+        continue;
+      }
       await dbStudentCourses.create({
         studentNo: id,
         sectionID: sectionID,
       });
       success.push(sectionID);
+      successCourse.push(courseName.dataValues.courseCode);
     } catch (error) {
       errors.push(`Error processing sectionID ${sectionID}: ${error.message}`);
       failed.push(sectionID);
