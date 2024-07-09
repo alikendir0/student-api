@@ -46,6 +46,15 @@ module.exports = function (app) {
     }
   });
 
+  app.put("/course/:id", async (req, res) => {
+    try {
+      const response = await courseService.edit(req.params.id, req.body);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.get("/courses/faculty/:id", async (req, res) => {
     try {
       const response = await courseService.getFromName(req.params.id);

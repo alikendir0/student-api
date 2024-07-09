@@ -28,6 +28,15 @@ module.exports = function (app) {
     }
   });
 
+  app.put("/instructor/:id", async (req, res) => {
+    try {
+      const response = await instructorService.edit(req.params.id, req.body);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.get("/instructor/:id", async (req, res) => {
     try {
       const response = await instructorService.get(req.params.id);

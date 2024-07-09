@@ -2,12 +2,20 @@ const { Response, ResponseStatus } = require("../models/response");
 
 const db = require("../managers");
 const dbStudent = db.students;
-const dbStudentCourses = db.studentCourses;
+const dbStudentSections = db.studentSections;
 const dbSection = db.sections;
+const dbDepartments = db.departments;
 
 const list = async () => {
   const data = await dbStudent.findAll({
     attributes: ["id", "firstName", "lastName", "studentNo"],
+    include: [
+      {
+        model: dbDepartments,
+        required: true,
+        attributes: ["id", "name"],
+      },
+    ],
   });
   const students = data.map((student) => student.dataValues);
   return new Response(ResponseStatus.SUCCESS, students);
@@ -15,7 +23,7 @@ const list = async () => {
 
 const getSections = async (id) => {
   try {
-    const data = await dbStudentCourses.findAll({
+    const data = await dbStudentSections.findAll({
       where: { studentNo: id },
       attributes: ["sectionID"],
     });
@@ -73,6 +81,29 @@ const del = async (id) => {
   }
 };
 
+const edit = async (id, data) => {
+  try {
+    const student = await dbStudent.findOne({ where: { studentNo: id } });
+    if (student) {
+      await student.update(data);
+      return new Response(ResponseStatus.SUCCESS, student);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student not found!"
+      );
+    }
+  } catch (error) {
+    console.error("Error updating student:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 const save = async (data) => {
   try {
     const existingID = await dbStudent.findOne({
@@ -117,7 +148,7 @@ const reset = async (ids) => {
     try {
       const student = dbStudent.findAll({ where: { studentNo: id } });
       if (student) {
-        dbStudentCourses.destroy({ where: { studentNo: id } });
+        dbStudentSections.destroy({ where: { studentNo: id } });
         success.push(id);
       }
     } catch (error) {
@@ -155,7 +186,7 @@ const assign = async (id, sectionIDs) => {
   const success = [];
   const successCourse = [];
   const studentSections = await getSections(id);
-  const existingCourses = studentSections.data.map(
+  const existingSections = studentSections.data.map(
     (section) => section.courseCode
   );
   for (const sectionID of sectionIDs) {
@@ -165,7 +196,7 @@ const assign = async (id, sectionIDs) => {
         attributes: ["courseCode"],
       });
       if (
-        existingCourses.includes(courseName.dataValues.courseCode) ||
+        existingSections.includes(courseName.dataValues.courseCode) ||
         successCourse.includes(courseName.dataValues.courseCode)
       ) {
         errors.push(
@@ -174,7 +205,7 @@ const assign = async (id, sectionIDs) => {
         failed.push(sectionID);
         continue;
       }
-      await dbStudentCourses.create({
+      await dbStudentSections.create({
         studentNo: id,
         sectionID: sectionID,
       });
@@ -182,6 +213,7 @@ const assign = async (id, sectionIDs) => {
       successCourse.push(courseName.dataValues.courseCode);
     } catch (error) {
       errors.push(`Error processing sectionID ${sectionID}: ${error.message}`);
+
       failed.push(sectionID);
     }
   }
@@ -219,7 +251,7 @@ const deassign = async (studentID, sectionCode) => {
         "Section not found!"
       );
     }
-    const studentCourse = await dbStudentCourses.findOne({
+    const studentCourse = await dbStudentSections.findOne({
       where: { studentNo: studentID, sectionID: sectionCode },
     });
     if (!studentCourse) {
@@ -245,6 +277,7 @@ module.exports = {
   list,
   getSections,
   del,
+  edit,
   save,
   reset,
   assign,

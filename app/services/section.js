@@ -1,5 +1,6 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
+const instructor = require("../controllers/instructor");
 const dbSection = db.sections;
 const dbInstructor = db.instructors;
 const dbCourse = db.courses;
@@ -16,14 +17,14 @@ const list = async () => {
           {
             model: db.faculties,
             required: true,
-            attributes: ["name"],
+            attributes: ["id", "name"],
           },
         ],
       },
       {
         model: db.instructors,
         required: true,
-        attributes: ["firstName", "lastName"],
+        attributes: ["instructorNo", "firstName", "lastName"],
       },
     ],
     attributes: ["id", "day", "roomNo", "hour", "capacity", "noStudents"],
@@ -32,10 +33,13 @@ const list = async () => {
     ...section.dataValues,
     courseCode: section.course.dataValues.code,
     instructor: {
+      instructorNo: section.instructor.dataValues.instructorNo,
       firstName: section.instructor.dataValues.firstName,
       lastName: section.instructor.dataValues.lastName,
     },
+    instructorNo: section.instructor.dataValues.instructorNo,
     faculty: section.course.faculty.dataValues.name,
+    facultyID: section.course.faculty.dataValues.id,
   }));
   return new Response(ResponseStatus.SUCCESS, data);
 };
@@ -124,9 +128,34 @@ const save = async (data) => {
   }
 };
 
+const edit = async (id, data) => {
+  console.log("Edit section", id, data);
+  try {
+    const section = await dbSection.findByPk(id);
+    if (section) {
+      await section.update(data);
+      return new Response(ResponseStatus.SUCCESS, section);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Section not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error updating section:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   get,
   del,
   save,
+  edit,
 };

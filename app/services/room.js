@@ -59,9 +59,29 @@ const get = async (id) => {
   }
 };
 
+const edit = async (id, data) => {
+  try {
+    const room = await db.rooms.findByPk(id);
+    if (room) {
+      await room.update(data);
+      return new Response(ResponseStatus.SUCCESS, room);
+    } else {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Room not found");
+    }
+  } catch (error) {
+    console.error("Error updating room:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   save,
   del,
   get,
+  edit,
 };
