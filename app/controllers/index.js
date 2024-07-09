@@ -4,6 +4,7 @@ const courseController = require("./course");
 const facultyController = require("./faculty");
 const instructorController = require("./instructor");
 const roomController = require("./room");
+const departmentController = require("./department");
 
 module.exports = {
   studentController,
@@ -12,4 +13,5 @@ module.exports = {
   facultyController,
   instructorController,
   roomController,
+  departmentController,
 };

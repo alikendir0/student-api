@@ -1,31 +1,27 @@
 "use strict";
-/** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("students", {
+    await queryInterface.createTable("departments", {
       id: {
-        unique: true,
-        type: Sequelize.STRING(11),
-      },
-      studentNo: {
+        allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        allowNull: false,
-        unique: true,
-        type: Sequelize.STRING(6),
+        type: Sequelize.INTEGER,
       },
-      firstName: {
-        allowNull: false,
+      name: {
         type: Sequelize.STRING,
-      },
-      lastName: {
         allowNull: false,
-        type: Sequelize.STRING,
       },
-      departmentID: {
+      abbreviation: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      facultyID: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "departments",
+          model: "faculties",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -40,7 +36,8 @@ module.exports = {
       },
     });
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("students");
+    await queryInterface.dropTable("departments");
   },
 };

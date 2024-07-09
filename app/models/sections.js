@@ -1,3 +1,5 @@
+const { on } = require("nodemon");
+
 // models/sectionModel.js
 module.exports = (sequelize, DataTypes) => {
   const Sections = sequelize.define("sections", {
@@ -18,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         key: "code",
       },
       onDelete: "CASCADE",
+      onUpdate: "CASCADE",
       validate: {
         isAlphanumeric: {
           args: true,
@@ -64,6 +67,7 @@ module.exports = (sequelize, DataTypes) => {
         key: "code",
       },
       onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
     capacity: {
       type: DataTypes.INTEGER,

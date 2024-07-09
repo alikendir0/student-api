@@ -10,7 +10,7 @@ const list = async () => {
       include: [
         {
           model: dbFaculty,
-          attributes: ["name"],
+          attributes: ["id", "name"],
           as: "faculty",
         },
       ],
@@ -20,6 +20,7 @@ const list = async () => {
         id: course.id,
         code: course.code,
         facultyName: course.faculty.name,
+        facultyID: course.faculty.id,
       }));
       return new Response(ResponseStatus.SUCCESS, courses);
     } else {
@@ -138,6 +139,26 @@ const save = async (data) => {
   }
 };
 
+const edit = async (id, data) => {
+  console.log("Edit course", id, data);
+  try {
+    const course = await dbCourses.findOne({ where: { id: id } });
+    if (course) {
+      await course.update(data);
+      return new Response(ResponseStatus.SUCCESS, course);
+    } else {
+      return new Response(ResponseStatus.BAD_REQUEST, null, "Course not found");
+    }
+  } catch (error) {
+    console.error("Error updating course:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   getFromName,
@@ -145,4 +166,5 @@ module.exports = {
   get,
   del,
   save,
+  edit,
 };

@@ -1,45 +1,45 @@
 module.exports = function (app) {
-  const facultyService = require("../services/faculty");
+  const departmentService = require("../services/department");
 
-  app.get("/faculties", async (req, res) => {
+  app.get("/departments", async (req, res) => {
     try {
-      const response = await facultyService.list();
+      const response = await departmentService.list();
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
     }
   });
 
-  app.post("/faculty", async (req, res) => {
+  app.post("/department", async (req, res) => {
     try {
-      const response = await facultyService.save(req.body);
+      const response = await departmentService.save(req.body);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
     }
   });
 
-  app.delete("/faculty/:id", async (req, res) => {
+  app.delete("/department/:id", async (req, res) => {
     try {
-      const response = await facultyService.del(req.params.id);
+      const response = await departmentService.del(req.params.id);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
     }
   });
 
-  app.put("/faculty/:id", async (req, res) => {
+  app.put("/department/:id", async (req, res) => {
     try {
-      const response = await facultyService.edit(req.params.id, req.body);
+      const response = await departmentService.edit(req.params.id, req.body);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
     }
   });
 
-  app.get("/faculty/:id", async (req, res) => {
+  app.get("/department/:id", async (req, res) => {
     try {
-      const response = await facultyService.get(req.params.id);
+      const response = await departmentService.get(req.params.id);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);

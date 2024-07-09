@@ -17,6 +17,7 @@ module.exports = {
           key: "code",
         },
         onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       day: {
         type: Sequelize.STRING,
@@ -41,6 +42,7 @@ module.exports = {
           key: "code",
         },
         onDelete: "SET NULL",
+        onUpdate: "CASCADE",
       },
       capacity: {
         type: Sequelize.INTEGER,

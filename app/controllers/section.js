@@ -28,6 +28,15 @@ module.exports = function (app) {
     }
   });
 
+  app.put("/section/:id", async (req, res) => {
+    try {
+      const response = await sectionService.edit(req.params.id, req.body);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.get("/section/:id", async (req, res) => {
     try {
       const response = await sectionService.get(req.params.id);

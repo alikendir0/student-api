@@ -23,12 +23,17 @@ db.students = require("../models/students.js")(sequelize, Sequelize);
 db.instructors = require("../models/instructors.js")(sequelize, Sequelize);
 db.courses = require("../models/courses.js")(sequelize, Sequelize);
 db.sections = require("../models/sections.js")(sequelize, Sequelize);
-db.studentCourses = require("../models/studentsections.js")(
+db.studentSections = require("../models/studentsections.js")(
   sequelize,
   Sequelize
 );
 db.faculties = require("../models/faculties.js")(sequelize, Sequelize);
 db.rooms = require("../models/rooms.js")(sequelize, Sequelize);
+db.departments = require("../models/departments.js")(sequelize, Sequelize);
+db.departmentCourses = require("../models/departmentcourses.js")(
+  sequelize,
+  Sequelize
+);
 
 db.faculties.hasMany(db.courses, {
   foreignKey: "facultyID",
@@ -38,21 +43,21 @@ db.courses.belongsTo(db.faculties, {
   foreignKey: "facultyID",
 });
 
-db.students.hasMany(db.studentCourses, {
+db.students.hasMany(db.studentSections, {
   foreignKey: "studentNo",
   as: "student-course",
 });
 
-db.studentCourses.belongsTo(db.students, {
+db.studentSections.belongsTo(db.students, {
   foreignKey: "studentNo",
 });
 
-db.sections.hasMany(db.studentCourses, {
+db.sections.hasMany(db.studentSections, {
   foreignKey: "sectionID",
   as: "section-course",
 });
 
-db.studentCourses.belongsTo(db.sections, {
+db.studentSections.belongsTo(db.sections, {
   foreignKey: "sectionID",
 });
 
@@ -91,6 +96,42 @@ db.rooms.hasMany(db.sections, {
 
 db.sections.belongsTo(db.rooms, {
   foreignKey: "roomNo",
+});
+
+db.faculties.hasMany(db.departments, {
+  foreignKey: "facultyID",
+  as: "faculty-departments",
+});
+
+db.departments.belongsTo(db.faculties, {
+  foreignKey: "facultyID",
+});
+
+db.departments.hasMany(db.departmentCourses, {
+  foreignKey: "id",
+  as: "department-course",
+});
+
+db.departmentCourses.hasMany(db.departments, {
+  foreignKey: "id",
+});
+
+db.courses.hasMany(db.departmentCourses, {
+  foreignKey: "code",
+  as: "course-department",
+});
+
+db.departmentCourses.hasMany(db.courses, {
+  foreignKey: "code",
+});
+
+db.departments.hasMany(db.students, {
+  foreignKey: "departmentID",
+  as: "department-students",
+});
+
+db.students.belongsTo(db.departments, {
+  foreignKey: "departmentID",
 });
 
 module.exports = db;

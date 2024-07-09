@@ -1,8 +1,6 @@
-const validator = require("./validators.js");
-
 module.exports = (sequelize, DataTypes) => {
-  const studentSections = sequelize.define(
-    "studentsections",
+  const DepartmentCourses = sequelize.define(
+    "departmentcourses",
     {
       id: {
         allowNull: false,
@@ -13,32 +11,28 @@ module.exports = (sequelize, DataTypes) => {
           isInt: { args: true, msg: "ID must be an integer" },
         },
       },
-      studentNo: {
-        type: DataTypes.STRING(11),
-        allowNull: false,
-        references: {
-          model: "students",
-          key: "studentNo",
-        },
-        onDelete: "CASCADE",
-        validate: {
-          isValidNo(value) {
-            if (!validator.isValidNo(value)) {
-              throw new Error("Invalid student number");
-            }
-          },
-        },
-      },
-      sectionID: {
+      departmentID: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "sections",
+          model: "departments",
           key: "id",
         },
         onDelete: "CASCADE",
         validate: {
-          isInt: { args: true, msg: "Section ID must be an integer" },
+          isInt: { args: true, msg: "Department ID must be an integer" },
+        },
+      },
+      courseID: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "courses",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        validate: {
+          isInt: { args: true, msg: "Course ID must be an integer" },
         },
       },
       createdAt: {
@@ -54,12 +48,11 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [
         {
           unique: true,
-          fields: ["studentNo", "sectionID"],
-          name: "unique_student_course",
+          fields: ["departmentID", "courseID"],
+          name: "unique_department_course",
         },
       ],
     }
   );
-
-  return studentSections;
+  return DepartmentCourses;
 };

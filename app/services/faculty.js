@@ -94,9 +94,33 @@ const save = async (data) => {
   }
 };
 
+const edit = async (id, data) => {
+  try {
+    const faculty = await dbFaculty.findOne({ where: { id: id } });
+    if (faculty) {
+      await faculty.update(data);
+      return new Response(ResponseStatus.SUCCESS, faculty);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Faculty not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error updating faculty:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   get,
   del,
   save,
+  edit,
 };

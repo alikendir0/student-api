@@ -78,6 +78,30 @@ const save = async (data) => {
   }
 };
 
+const edit = async (id, data) => {
+  try {
+    const instructor = await dbInstructor.findOne({
+      where: { instructorNo: id },
+    });
+    if (instructor) {
+      await instructor.update(data);
+      return new Response(ResponseStatus.SUCCESS, instructor);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Instructor not found"
+      );
+    }
+  } catch (error) {
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      error.message
+    );
+  }
+};
+
 const getByFaculty = async (facultyID) => {
   const data = await dbInstructor.findAll({
     where: { facultyID: facultyID },
@@ -95,6 +119,7 @@ module.exports = {
   list,
   get,
   del,
+  edit,
   save,
   getByFaculty,
 };

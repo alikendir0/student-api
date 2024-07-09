@@ -28,6 +28,24 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/student/:id", async (req, res) => {
+    try {
+      const response = await studentService.get(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
+  app.put("/student/:id", async (req, res) => {
+    try {
+      const response = await studentService.edit(req.params.id, req.body);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.get("/student/sections/:id", async (req, res) => {
     try {
       const response = await studentService.getSections(req.params.id);
