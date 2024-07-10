@@ -6,7 +6,7 @@ const dbFaculty = db.faculties;
 const list = async () => {
   try {
     const data = await dbCourses.findAll({
-      attributes: ["id", "code"],
+      attributes: ["id", "code", "name", "description"],
       include: [
         {
           model: dbFaculty,
@@ -19,6 +19,8 @@ const list = async () => {
       const courses = data.map((course) => ({
         id: course.id,
         code: course.code,
+        name: course.name,
+        description: course.description,
         facultyName: course.faculty.name,
         facultyID: course.faculty.id,
       }));

@@ -14,6 +14,14 @@ module.exports = {
         unique: true,
         allowNull: false,
       },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       facultyID: {
         type: Sequelize.INTEGER,
         allowNull: false,

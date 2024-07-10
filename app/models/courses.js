@@ -26,6 +26,20 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: {
+          args: [3, 64],
+          msg: "Name must be between 3 and 64 characters",
+        },
+      },
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     facultyID: {
       type: DataTypes.INTEGER,
       allowNull: false,

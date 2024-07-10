@@ -5,7 +5,14 @@ const dbFaculty = db.faculties;
 
 const list = async () => {
   const data = await dbInstructor.findAll({
-    attributes: ["id", "firstName", "lastName", "instructorNo", "facultyID"],
+    attributes: [
+      "id",
+      "firstName",
+      "lastName",
+      "instructorNo",
+      "facultyID",
+      "gender",
+    ],
   });
   const instructors = data.map((instructor) => instructor.dataValues);
 

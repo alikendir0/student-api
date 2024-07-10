@@ -10,7 +10,7 @@ module.exports = {
       },
       instructorNo: {
         allowNull: false,
-        type: Sequelize.STRING(6),
+        type: Sequelize.STRING(8),
         primaryKey: true,
       },
       firstName: {
@@ -20,6 +20,10 @@ module.exports = {
       lastName: {
         allowNull: false,
         type: Sequelize.STRING,
+      },
+      gender: {
+        allowNull: false,
+        type: Sequelize.ENUM("M", "F", "O"),
       },
       facultyID: {
         type: Sequelize.INTEGER,

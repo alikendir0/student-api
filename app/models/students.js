@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     studentNo: {
       primaryKey: true,
       allowNull: false,
-      type: DataTypes.STRING(6),
+      type: DataTypes.STRING(8),
       validate: {
         isValidNo(value) {
           if (!validator.isValidNo(value)) {
@@ -53,7 +53,16 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
-
+    gender: {
+      allowNull: false,
+      type: DataTypes.ENUM("M", "F", "O"),
+      validate: {
+        isIn: {
+          args: [["M", "F", "O"]],
+          msg: "Gender must be M, F, or O",
+        },
+      },
+    },
     departmentID: {
       type: DataTypes.INTEGER,
       allowNull: false,

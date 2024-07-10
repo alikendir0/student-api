@@ -8,7 +8,7 @@ const dbDepartments = db.departments;
 
 const list = async () => {
   const data = await dbStudent.findAll({
-    attributes: ["id", "firstName", "lastName", "studentNo"],
+    attributes: ["id", "firstName", "lastName", "studentNo", "gender"],
     include: [
       {
         model: dbDepartments,
@@ -61,14 +61,23 @@ const getSections = async (id) => {
 const del = async (id) => {
   try {
     const student = await dbStudent.findOne({ where: { studentNo: id } });
-    if (student) {
+    const studentSections = await dbStudentSections.findAll({
+      where: { studentNo: id },
+    });
+    if (student && studentSections == 0) {
       await student.destroy();
       return new Response(ResponseStatus.SUCCESS, null);
-    } else {
+    } else if (!student) {
       return new Response(
         ResponseStatus.BAD_REQUEST,
         null,
         "Student not found!"
+      );
+    } else if (studentSections.length > 0) {
+      return new Response(
+        ResponseStatus.CONFLICT,
+        null,
+        "Student has sections assigned!"
       );
     }
   } catch (error) {
@@ -116,17 +125,23 @@ const save = async (data) => {
         "Student ID already exists!"
       );
     }
-    const existingNo = await dbStudent.findOne({
-      where: { studentNo: data.studentNo },
-    });
 
-    if (existingNo) {
+    const department = await dbDepartments.findOne({
+      where: { id: data.departmentID },
+    });
+    if (!department) {
       return new Response(
         ResponseStatus.BAD_REQUEST,
         null,
-        "Student number already exists!"
+        "Department not found!"
       );
     }
+
+    const studentNo = await generateStudentNo(data.departmentID);
+    console.log("StudentNo", studentNo);
+
+    data = { ...data, studentNo: studentNo };
+
     const student = await dbStudent.create(data);
     return new Response(ResponseStatus.CREATED, student);
   } catch (error) {
@@ -271,6 +286,34 @@ const deassign = async (studentID, sectionCode) => {
       "An error occurred"
     );
   }
+};
+
+const generateStudentNo = async (departmentID) => {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const departmentIDPadded = departmentID.toString().padStart(2, "0");
+  const uniqueDigits = await generateUniqueDigits(year, departmentIDPadded);
+
+  return `${year}${departmentIDPadded}${uniqueDigits}`;
+};
+
+const generateUniqueDigits = async (year, departmentID) => {
+  let unique = false;
+  let uniqueDigits;
+
+  while (!unique) {
+    uniqueDigits = generateDigits();
+    const studentExists = await dbStudent.findOne({
+      where: { studentNo: `${year}${departmentID}${uniqueDigits}` },
+    });
+    if (!studentExists) {
+      unique = true;
+    }
+  }
+  return uniqueDigits;
+};
+
+const generateDigits = () => {
+  return Math.floor(1000 + Math.random() * 9000).toString();
 };
 
 module.exports = {
