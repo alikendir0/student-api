@@ -14,7 +14,7 @@ class Validators {
   }
 
   static isValidNo(value) {
-    if (value && value.length !== 6) {
+    if (value && value.length !== 8) {
       return false;
     } else if (value === null || value === "") {
       return false;

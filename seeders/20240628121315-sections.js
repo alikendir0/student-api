@@ -10,7 +10,7 @@ module.exports = {
         {
           courseCode: "HIST101",
           day: "T",
-          hour: "8:00-9:00",
+          hour: "08:00-09:00",
           roomNo: "D-012",
           instructorNo: "432789",
           capacity: 50,

@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     instructorNo: {
-      type: DataTypes.STRING(6),
+      type: DataTypes.STRING(8),
       references: {
         model: "instructor",
         key: "instructorNo",
