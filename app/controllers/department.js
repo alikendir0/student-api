@@ -45,4 +45,13 @@ module.exports = function (app) {
       res.status(500).json(error);
     }
   });
+
+  app.get("/department/name/:name", async (req, res) => {
+    try {
+      const response = await departmentService.getFromName(req.params.name);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
 };
