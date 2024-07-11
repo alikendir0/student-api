@@ -1,5 +1,6 @@
 const { Response, ResponseStatus } = require("../models/response");
 
+const { Op } = require("sequelize");
 const db = require("../managers");
 const dbStudent = db.students;
 const dbStudentSections = db.studentSections;
@@ -16,9 +17,74 @@ const list = async () => {
         attributes: ["id", "name"],
       },
     ],
+    order: [["firstName", "ASC"]],
   });
   const students = data.map((student) => student.dataValues);
   return new Response(ResponseStatus.SUCCESS, students);
+};
+
+const listPage = async (query) => {
+  try {
+    const {
+      firstName = "",
+      lastName = "",
+      studentNo = "",
+      id = "",
+      gender = "",
+      departmentID = "",
+      sortBy = "id",
+      page = 1,
+      pageSize = 10,
+    } = query;
+
+    const offset = (page - 1) * pageSize;
+
+    const limit = pageSize;
+
+    const whereCondition = {
+      [Op.and]: [
+        firstName && { firstName: { [Op.iLike]: `${firstName}` } },
+        lastName && { lastName: { [Op.iLike]: `%${lastName}%` } },
+        studentNo && { studentNo: { [Op.iLike]: `%${studentNo}%` } },
+        id && { id: { [Op.iLike]: `%${id}%` } },
+        gender && { gender: { [Op.eq]: `${gender}` } },
+        departmentID && { departmentID: { [Op.eq]: `${departmentID}` } },
+      ].filter(Boolean),
+    };
+
+    const { count, rows } = await dbStudent.findAndCountAll({
+      attributes: ["id", "firstName", "lastName", "studentNo", "gender"],
+      include: [
+        {
+          model: dbDepartments,
+          required: true,
+          attributes: ["id", "name"],
+        },
+      ],
+      where: whereCondition,
+      order: [[sortBy, "ASC"]],
+      limit,
+      offset,
+    });
+
+    const maxPage = Math.ceil(count / pageSize);
+
+    const students = rows.map((student) => student.dataValues);
+    return new Response(ResponseStatus.SUCCESS, {
+      students,
+      count,
+      page,
+      pageSize,
+      maxPage,
+    });
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 const getSections = async (id) => {
@@ -318,6 +384,7 @@ const generateDigits = () => {
 
 module.exports = {
   list,
+  listPage,
   getSections,
   del,
   edit,

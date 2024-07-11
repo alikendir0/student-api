@@ -1,9 +1,24 @@
 module.exports = function (app) {
   const studentService = require("../services/student");
 
-  app.get("/students", async (req, res) => {
+  app.get("/students/all", async (req, res) => {
     try {
       const response = await studentService.list();
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+  //pagination function
+  app.get("/students", async (req, res) => {
+    try {
+      // const page = parseInt(req.query.page) || 1;
+      // const pageSize = parseInt(req.query.pageSize) || 10;
+      // const sortBy = req.query.sortBy;
+      // const { firstName, lastName, studentNo, id, gender, departmentID } =
+      //   req.query;
+
+      const response = await studentService.listPage(req.query);
       res.status(response.status).json(response);
     } catch (error) {
       res.status(500).json(error);
