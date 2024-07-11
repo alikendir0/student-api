@@ -35,6 +35,7 @@ const listPage = async (query) => {
       sortBy = "id",
       page = 1,
       pageSize = 10,
+      order = "ASC",
     } = query;
 
     const offset = (page - 1) * pageSize;
@@ -62,7 +63,7 @@ const listPage = async (query) => {
         },
       ],
       where: whereCondition,
-      order: [[sortBy, "ASC"]],
+      order: [[sortBy, order.toUpperCase()]],
       limit,
       offset,
     });
