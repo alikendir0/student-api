@@ -25,7 +25,7 @@ const list = async () => {
 
 const listPage = async (query) => {
   try {
-    const {
+    var {
       firstName = "",
       lastName = "",
       studentNo = "",
@@ -37,6 +37,14 @@ const listPage = async (query) => {
       pageSize = 10,
       order = "ASC",
     } = query;
+
+    if (order === "") {
+      order = "ASC";
+    }
+
+    if (sortBy === "") {
+      sortBy = "firstName";
+    }
 
     const offset = (page - 1) * pageSize;
 

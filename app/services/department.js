@@ -14,6 +14,7 @@ const list = async () => {
           as: "faculty",
         },
       ],
+      order: [["name", "ASC"]],
     });
     if (data) {
       const departments = data.map((department) => ({
