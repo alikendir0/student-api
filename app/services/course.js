@@ -1,7 +1,10 @@
 const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
+const { where } = require("sequelize");
 const dbCourses = db.courses;
 const dbFaculty = db.faculties;
+const dbDepartmentCourses = db.departmentCourses;
+const dbDepartments = db.departments;
 
 const list = async () => {
   try {
@@ -161,6 +164,42 @@ const edit = async (id, data) => {
   }
 };
 
+const getDepartmentCourses = async (id) => {
+  try {
+    const data = await dbDepartmentCourses.findAll({
+      where: { courseID: id },
+      attributes: ["period"],
+      include: [
+        {
+          model: dbDepartments,
+          attributes: ["id", "name"],
+          as: "departments",
+        },
+      ],
+    });
+    if (data) {
+      const courses = data.map((course) => ({
+        period: course.dataValues.period,
+        departmentName: course.dataValues.departments,
+      }));
+      return new Response(ResponseStatus.SUCCESS, courses);
+    } else {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Courses not found"
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching courses for department:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   getFromName,
@@ -169,4 +208,5 @@ module.exports = {
   del,
   save,
   edit,
+  getDepartmentCourses,
 };

@@ -9,9 +9,6 @@ module.exports = {
       [
         {
           courseCode: "HIST101",
-          day: "T",
-          hour: "08:00-09:00",
-          roomNo: "D-012",
           instructorNo: "432789",
           capacity: 50,
           noStudents: 22,
@@ -20,9 +17,6 @@ module.exports = {
         },
         {
           courseCode: "HIST102",
-          day: "M",
-          hour: "12:00-13:00",
-          roomNo: "G-578",
           instructorNo: "373289",
           capacity: 50,
           noStudents: 45,

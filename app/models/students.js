@@ -76,6 +76,16 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
 
+    period: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: { args: true, msg: "Period must be an integer" },
+        min: { args: 1, msg: "Period must be greater than or equal to 1" },
+        max: { args: 8, msg: "Period must be less than or equal to 8" },
+      },
+    },
+
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,

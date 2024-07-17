@@ -6,26 +6,37 @@ module.exports = {
       "departmentcourses",
       [
         {
-          departmentID: 1, // Assuming a department with ID 1 exists
-          courseID: 1, // Assuming a course with ID 1 exists
+          departmentID: 1,
+          period: 1,
+          courseID: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          departmentID: 1, // Same department, different course
-          courseID: 2, // Assuming a course with ID 2 exists
+          departmentID: 2,
+          period: 3,
+          courseID: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          departmentID: 2, // Another department
-          courseID: 3, // Assuming a course with ID 3 exists
+          departmentID: 1,
+          period: 1,
+          courseID: 2,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          departmentID: 2, // Another department
-          courseID: 4, // Assuming a course with ID 4 exists
+          departmentID: 2,
+          period: 1,
+          courseID: 3,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          departmentID: 2,
+          period: 1,
+          courseID: 4,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

@@ -18,9 +18,12 @@ module.exports = {
         },
         onDelete: "CASCADE",
       },
-      courseID: {
+      period: {
         type: Sequelize.INTEGER,
         allowNull: false,
+      },
+      courseID: {
+        type: Sequelize.INTEGER,
         references: {
           model: "courses",
           key: "id",
@@ -36,12 +39,8 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
-    await queryInterface.addConstraint("departmentcourses", {
-      fields: ["departmentID", "courseID"],
-      type: "unique",
-      name: "unique_department_course",
-    });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("departmentcourses");
   },

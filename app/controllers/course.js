@@ -28,6 +28,15 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/course/department/period/:id", async (req, res) => {
+    try {
+      const response = await courseService.getDepartmentCourses(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.post("/course", async (req, res) => {
     try {
       const response = await courseService.save(req.body);

@@ -28,6 +28,16 @@ module.exports = function (app) {
     }
   });
 
+  app.delete("/section/session/:id", async (req, res) => {
+    try {
+      console.log("djwiqd");
+      const response = await sectionService.delSession(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.put("/section/:id", async (req, res) => {
     try {
       const response = await sectionService.edit(req.params.id, req.body);

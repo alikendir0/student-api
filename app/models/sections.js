@@ -32,26 +32,6 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
-    day: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isIn: {
-          args: [["M", "T", "W", "TH", "F"]],
-          msg: "Day must be M, T, W, TH, or F",
-        },
-      },
-    },
-    hour: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        is: {
-          args: [/^\d{2}:\d{2}-\d{2}:\d{2}$/],
-          msg: "Hour must be in the format HH:MM-HH:MM",
-        },
-      },
-    },
     instructorNo: {
       type: DataTypes.STRING(8),
       references: {
@@ -60,15 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       onDelete: "SET NULL",
     },
-    roomNo: {
-      type: DataTypes.STRING,
-      references: {
-        model: "rooms",
-        key: "code",
-      },
-      onDelete: "SET NULL",
-      onUpdate: "CASCADE",
-    },
+
     capacity: {
       type: DataTypes.INTEGER,
       allowNull: false,

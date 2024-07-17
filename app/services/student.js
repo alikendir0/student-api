@@ -6,6 +6,7 @@ const dbStudent = db.students;
 const dbStudentSections = db.studentSections;
 const dbSection = db.sections;
 const dbDepartments = db.departments;
+const dbDepartmentCourses = db.departmentCourses;
 
 const list = async () => {
   const data = await dbStudent.findAll({
@@ -32,6 +33,7 @@ const listPage = async (query) => {
       id = "",
       gender = "",
       departmentID = "",
+      period = "",
       sortBy = "id",
       page = 1,
       pageSize = 10,
@@ -58,11 +60,19 @@ const listPage = async (query) => {
         id && { id: { [Op.iLike]: `%${id}%` } },
         gender && { gender: { [Op.eq]: `${gender}` } },
         departmentID && { departmentID: { [Op.eq]: `${departmentID}` } },
+        period && { period: { [Op.eq]: `${period}` } },
       ].filter(Boolean),
     };
 
     const { count, rows } = await dbStudent.findAndCountAll({
-      attributes: ["id", "firstName", "lastName", "studentNo", "gender"],
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "studentNo",
+        "gender",
+        "period",
+      ],
       include: [
         {
           model: dbDepartments,
@@ -166,6 +176,7 @@ const del = async (id) => {
 };
 
 const edit = async (id, data) => {
+  console.log("Edit student", id, data);
   try {
     const student = await dbStudent.findOne({ where: { studentNo: id } });
     if (student) {
@@ -279,6 +290,18 @@ const assign = async (id, sectionIDs) => {
   const existingSections = studentSections.data.map(
     (section) => section.courseCode
   );
+  const student = await dbStudent.findOne({ where: { studentNo: id } });
+  if (!student) {
+    return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
+  }
+
+  const temp = await dbDepartmentCourses.findAll({
+    where: { departmentID: student.departmentID, period: student.period },
+    attributes: ["courseID"],
+  });
+
+  const possibleCourses = temp.map((course) => course.dataValues.courseID);
+
   for (const sectionID of sectionIDs) {
     try {
       const courseName = await dbSection.findOne({
@@ -291,6 +314,12 @@ const assign = async (id, sectionIDs) => {
       ) {
         errors.push(
           `Error processing sectionID ${sectionID}: Student already assigned to this course`
+        );
+        failed.push(sectionID);
+        continue;
+      } else if (!possibleCourses.includes(courseName.dataValues.courseCode)) {
+        errors.push(
+          `Error processing sectionID ${sectionID}: Course not available for student`
         );
         failed.push(sectionID);
         continue;
