@@ -1,6 +1,6 @@
 const { Response, ResponseStatus } = require("../models/response");
 
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const db = require("../managers");
 const dbStudent = db.students;
 const dbStudentSections = db.studentSections;
@@ -98,6 +98,102 @@ const listPage = async (query) => {
     });
   } catch (error) {
     console.error("Error fetching students:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
+const searchStudentSQL = async (query) => {
+  try {
+    var params = `SELECT s."firstName", s."lastName", d.name FROM students s JOIN departments d ON s."departmentID"= d.id WHERE 1=1 `;
+    var values = [];
+    if (query.firstName) {
+      params += `AND "firstName" = ? `;
+      values.push(query.firstName);
+    }
+    if (query.lastName) {
+      params += `AND "lastName" = ? `;
+      values.push(query.lastName);
+    }
+    if (query.studentNo) {
+      params += `AND "studentNo" = ? `;
+      values.push(query.studentNo);
+    }
+    if (query.id) {
+      params += `AND "id" = ? `;
+      values.push(query.id);
+    }
+    if (query.gender) {
+      params += `AND "gender" = ? `;
+      values.push(query.gender);
+    }
+    if (query.departmentID) {
+      params += `AND "departmentID" = ? `;
+      values.push(query.departmentID);
+    }
+
+    const students = await db.sequelize.query(params, {
+      replacements: values,
+      type: QueryTypes.SELECT,
+    });
+
+    const JSONobj = [];
+
+    students.map((student) =>
+      JSONobj.push({
+        name: student.firstName + " " + student.lastName,
+        department: student.name,
+      })
+    );
+
+    return new Response(ResponseStatus.SUCCESS, JSONobj);
+  } catch (error) {
+    console.error("Error searching students:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
+const searchCourseTakers = async (params) => {
+  try {
+    var query =
+      'SELECT s."firstName", s."lastName", d."name"' +
+      ' FROM students s INNER JOIN departments d ON s."departmentID" = d.id ' +
+      "WHERE 1=1 ";
+
+    if (params.courseCode) {
+      query += `AND EXISTS (SELECT 0 
+      FROM sections sec, studentsections ss
+      WHERE ss."studentNo" = s."studentNo" 
+      AND ss."sectionID" = sec.id
+      AND sec."courseCode" = ${params.courseCode}) `;
+    }
+    if (params.departmentID) {
+      query += `AND d."id" = :departmentID `;
+    }
+    if (params.firstName) {
+      query += `AND s."firstName" = :firstName `;
+    }
+    console.log("Query", query);
+
+    const students = await db.sequelize.query(query, {
+      type: QueryTypes.SELECT,
+      replacements: {
+        sectionID: params.courseCode,
+        departmentID: params.departmentID,
+        firstName: params.firstName,
+      },
+    });
+
+    return new Response(ResponseStatus.SUCCESS, students);
+  } catch (error) {
+    console.error("Error searching students:", error);
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
@@ -294,13 +390,20 @@ const assign = async (id, sectionIDs) => {
   if (!student) {
     return new Response(ResponseStatus.BAD_REQUEST, null, "Student not found!");
   }
-
+  console.log("student");
   const temp = await dbDepartmentCourses.findAll({
-    where: { departmentID: student.departmentID, period: student.period },
-    attributes: ["courseID"],
+    where: { departmentID: student.departmentID },
+    attributes: ["courseID", "period"],
   });
 
-  const possibleCourses = temp.map((course) => course.dataValues.courseID);
+  for (const course of temp) {
+    if (course.dataValues.period > student.period) {
+      temp.splice(temp.indexOf(course), 1);
+    }
+  }
+  const possibleCourses = temp.map((course) => course.dataValues.courseCode);
+
+  console.log(existingSections);
 
   for (const sectionID of sectionIDs) {
     try {
@@ -317,13 +420,14 @@ const assign = async (id, sectionIDs) => {
         );
         failed.push(sectionID);
         continue;
-      } else if (!possibleCourses.includes(courseName.dataValues.courseCode)) {
+      } else if (!possibleCourses.includes(courseName.dataValues.courseID)) {
         errors.push(
           `Error processing sectionID ${sectionID}: Course not available for student`
         );
         failed.push(sectionID);
         continue;
       }
+
       await dbStudentSections.create({
         studentNo: id,
         sectionID: sectionID,
@@ -336,6 +440,7 @@ const assign = async (id, sectionIDs) => {
       failed.push(sectionID);
     }
   }
+
   if (errors.length === sectionIDs.length) {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
@@ -430,4 +535,6 @@ module.exports = {
   reset,
   assign,
   deassign,
+  searchStudentSQL,
+  searchCourseTakers,
 };

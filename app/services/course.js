@@ -164,23 +164,25 @@ const edit = async (id, data) => {
   }
 };
 
-const getDepartmentCourses = async (id) => {
+const getCoursesDepartments = async (id) => {
   try {
-    const data = await dbDepartmentCourses.findAll({
-      where: { courseID: id },
-      attributes: ["period"],
+    const data = await dbDepartments.findAll({
+      attributes: ["id", "name"],
       include: [
         {
-          model: dbDepartments,
-          attributes: ["id", "name"],
-          as: "departments",
+          model: dbDepartmentCourses,
+          where: { courseID: id },
+          attributes: ["period", "id"],
+          as: "department-course",
         },
       ],
     });
     if (data) {
       const courses = data.map((course) => ({
-        period: course.dataValues.period,
-        departmentName: course.dataValues.departments,
+        departmentID: course.dataValues.id,
+        departmentName: course.dataValues.name,
+        id: course.dataValues["department-course"][0].id,
+        period: course.dataValues["department-course"][0].period,
       }));
       return new Response(ResponseStatus.SUCCESS, courses);
     } else {
@@ -208,5 +210,5 @@ module.exports = {
   del,
   save,
   edit,
-  getDepartmentCourses,
+  getCoursesDepartments,
 };

@@ -19,6 +19,24 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/testt", async (req, res) => {
+    try {
+      const response = await studentService.searchStudentSQL(req.query);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
+  app.get("/students/search", async (req, res) => {
+    try {
+      const response = await studentService.searchCourseTakers(req.query);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.post("/student", async function (req, res) {
     try {
       const response = await studentService.save(req.body);

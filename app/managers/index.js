@@ -112,21 +112,21 @@ db.departments.belongsTo(db.faculties, {
 });
 
 db.departments.hasMany(db.departmentCourses, {
-  foreignKey: "id",
+  foreignKey: "departmentID",
   as: "department-course",
 });
 
-db.departmentCourses.hasMany(db.departments, {
-  foreignKey: "id",
+db.departmentCourses.belongsTo(db.departments, {
+  foreignKey: "departmentID",
 });
 
 db.courses.hasMany(db.departmentCourses, {
-  foreignKey: "code",
+  foreignKey: "courseID",
   as: "course-department",
 });
 
-db.departmentCourses.hasMany(db.courses, {
-  foreignKey: "code",
+db.departmentCourses.belongsTo(db.courses, {
+  foreignKey: "courseID",
 });
 
 db.departments.hasMany(db.students, {

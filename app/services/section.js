@@ -6,37 +6,48 @@ const dbSection = db.sections;
 const dbSession = db.sectionSessions;
 const dbInstructor = db.instructors;
 const dbCourse = db.courses;
+const dbFaculties = db.faculties;
 const dbRoom = db.rooms;
+const dbDepartmentCourses = db.departmentCourses;
 
 const list = async () => {
-  const sectionsWithFaculties = await db.sections.findAll({
-    include: [
-      {
-        model: db.courses,
-        required: true,
-        attributes: ["code"],
-        include: [
-          {
-            model: db.faculties,
-            required: true,
-            attributes: ["id", "name"],
-          },
-        ],
-      },
-      {
-        model: db.instructors,
-        required: true,
-        attributes: ["instructorNo", "firstName", "lastName"],
-      },
-      {
-        model: db.sectionSessions,
-        as: "section-sessions",
-        attributes: ["day", "hour", "roomNo", "id"],
-      },
-    ],
-    attributes: ["id", "capacity", "noStudents"],
-  });
-  return new Response(ResponseStatus.SUCCESS, sectionsWithFaculties);
+  try {
+    const sectionsWithFaculties = await db.sections.findAll({
+      include: [
+        {
+          model: db.courses,
+          required: true,
+          attributes: ["code"],
+          include: [
+            {
+              model: db.faculties,
+              required: true,
+              attributes: ["id", "name"],
+            },
+          ],
+        },
+        {
+          model: db.instructors,
+          required: true,
+          attributes: ["instructorNo", "firstName", "lastName"],
+        },
+        {
+          model: db.sectionSessions,
+          as: "section-sessions",
+          attributes: ["day", "hour", "roomNo", "id"],
+        },
+      ],
+      attributes: ["id", "capacity", "noStudents"],
+    });
+    return new Response(ResponseStatus.SUCCESS, sectionsWithFaculties);
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
 };
 
 const get = async (id) => {
@@ -85,6 +96,7 @@ const del = async (id) => {
 };
 
 const save = async (data) => {
+  console.log(data);
   try {
     const instructor = await dbInstructor.findOne({
       where: {
@@ -111,6 +123,7 @@ const save = async (data) => {
     const section = await dbSection.create(data);
 
     var sessionErrors = [];
+
     for (const s of data["section-sessions"]) {
       s.id = undefined;
       s.sectionID = data.sectionID;
@@ -141,6 +154,7 @@ const save = async (data) => {
         sessionErrors.push(s);
         continue;
       }
+
       await dbSession.create({
         sectionID: section.dataValues.id,
         day: s.day,
@@ -244,6 +258,82 @@ const delSession = async (id) => {
   }
 };
 
+const getForStudent = async (id) => {
+  try {
+    const student = await db.students.findOne({
+      where: { studentNo: id },
+      attributes: ["departmentID", "period"],
+    });
+    if (!student) {
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "Student not found"
+      );
+    }
+
+    console.log("Student", student.dataValues.departmentID);
+
+    const sections = await dbSection.findAll({
+      include: [
+        {
+          model: dbCourse,
+          required: true,
+          attributes: ["id", "code"],
+          include: [
+            {
+              model: dbFaculties,
+              required: true,
+              as: "faculty",
+              attributes: ["id", "name"],
+            },
+            {
+              model: dbDepartmentCourses,
+              required: true,
+              where: {
+                departmentID: student.dataValues.departmentID,
+              },
+              as: "course-department",
+              attributes: ["departmentID", "period"],
+            },
+          ],
+        },
+        {
+          model: dbSession,
+          as: "section-sessions",
+          attributes: ["id", "day", "hour", "roomNo"],
+        },
+        {
+          model: dbInstructor,
+          required: true,
+          attributes: ["instructorNo", "firstName", "lastName"],
+        },
+      ],
+      attributes: ["id", "capacity", "noStudents"],
+    });
+
+    //filtering the sections based on the period provided
+    for (const section of sections) {
+      console.log(section.dataValues.course.dataValues);
+      if (
+        section.dataValues.course.dataValues["course-department"][0].dataValues
+          .period > student.dataValues.period
+      ) {
+        sections.splice(sections.indexOf(section), 1);
+      }
+    }
+
+    return new Response(ResponseStatus.SUCCESS, sections);
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 const checkConflict = (hour, sessions) => {
   const [newStart, newEnd] = hour.split("-");
   //assigning the start and end time to a value
@@ -272,6 +362,7 @@ const checkConflict = (hour, sessions) => {
       return true;
   }
 };
+
 module.exports = {
   list,
   get,
@@ -279,4 +370,5 @@ module.exports = {
   save,
   edit,
   delSession,
+  getForStudent,
 };

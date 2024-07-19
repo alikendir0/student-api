@@ -2,6 +2,8 @@ const { Response, ResponseStatus } = require("../models/response");
 const db = require("../managers");
 const dbDepartments = db.departments;
 const dbFaculty = db.faculties;
+const dbCourses = db.courses;
+const dbDepartmentCourses = db.departmentCourses;
 
 const list = async () => {
   try {
@@ -133,10 +135,40 @@ const get = async (id) => {
   }
 };
 
+const getCirriculum = async (id) => {
+  try {
+    const data = await dbDepartmentCourses.findAll({
+      where: { departmentID: id },
+      attributes: ["period", "id"],
+      include: [
+        {
+          model: dbDepartments,
+          attributes: ["id", "name"],
+          as: "departments",
+        },
+        {
+          model: dbCourses,
+          attributes: ["id", "code", "name"],
+          as: "courses",
+        },
+      ],
+    });
+    return new Response(ResponseStatus.SUCCESS, data);
+  } catch (error) {
+    console.error("Error fetching cirriculum:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
+  }
+};
+
 module.exports = {
   list,
   save,
   del,
   edit,
   get,
+  getCirriculum,
 };

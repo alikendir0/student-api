@@ -10,6 +10,15 @@ module.exports = function (app) {
     }
   });
 
+  app.get("/department/cirriculum/:id", async (req, res) => {
+    try {
+      const response = await departmentService.getCirriculum(req.params.id);
+      res.status(response.status).json(response);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  });
+
   app.post("/department", async (req, res) => {
     try {
       const response = await departmentService.save(req.body);
