@@ -167,6 +167,8 @@ const searchCourseTakers = async (params) => {
       ' FROM students s INNER JOIN departments d ON s."departmentID" = d.id ' +
       "WHERE 1=1 ";
 
+    //this approach is vulnerable to SQL injection:
+    //try 127.0.0.1:3000/students/search?courseCode='101'); SELECT table_name FROM information_schema.tables --
     if (params.courseCode) {
       query += `AND EXISTS (SELECT 0 
       FROM sections sec, studentsections ss
@@ -174,6 +176,7 @@ const searchCourseTakers = async (params) => {
       AND ss."sectionID" = sec.id
       AND sec."courseCode" = ${params.courseCode}) `;
     }
+    //these approaches are safe from SQL injection
     if (params.departmentID) {
       query += `AND d."id" = :departmentID `;
     }

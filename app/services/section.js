@@ -97,6 +97,7 @@ const del = async (id) => {
 
 const save = async (data) => {
   console.log(data);
+
   try {
     const instructor = await dbInstructor.findOne({
       where: {
@@ -122,6 +123,7 @@ const save = async (data) => {
     data.instructorNo = instructor.instructorNo;
     const section = await dbSection.create(data);
 
+    var sessionSuccess = [];
     var sessionErrors = [];
 
     for (const s of data["section-sessions"]) {
@@ -134,23 +136,7 @@ const save = async (data) => {
         return new Response(ResponseStatus.BAD_REQUEST, null, "Room not found");
       }
 
-      const sessions = await dbSection.findAll({
-        include: [
-          {
-            model: dbSession,
-            as: "section-sessions",
-            required: true,
-            where: {
-              day: s.day,
-              roomNo: s.roomNo,
-            },
-            attributes: ["day", "hour"],
-          },
-        ],
-        attributes: ["id"],
-      });
-
-      if (checkConflict(s.hour, sessions)) {
+      if (await checkConflict(-1, s.hour, s.day, s.roomNo)) {
         sessionErrors.push(s);
         continue;
       }
@@ -161,7 +147,18 @@ const save = async (data) => {
         hour: s.hour,
         roomNo: s.roomNo,
       });
+      sessionSuccess.push(s);
     }
+
+    if (sessionSuccess.length === 0) {
+      await section.destroy();
+      return new Response(
+        ResponseStatus.BAD_REQUEST,
+        null,
+        "All sessions have conflicts"
+      );
+    }
+
     if (sessionErrors.length === data["section-sessions"].length) {
       await section.destroy();
       return new Response(
@@ -200,6 +197,15 @@ const edit = async (id, data) => {
         },
       });
       const currSessions = temp.map((s) => s.dataValues.id);
+      console.log("Current sessions", currSessions);
+      console.log("New sessions", sessionsIDs);
+      for (const sessionID of currSessions) {
+        if (!sessionsIDs.includes(sessionID)) {
+          console.log("Deleting session");
+          const session = await dbSession.findByPk(sessionID);
+          session.destroy();
+        }
+      }
       for (const sessionID of sessionsIDs) {
         if (!currSessions.includes(sessionID)) {
           console.log("Creating session");
@@ -207,13 +213,34 @@ const edit = async (id, data) => {
             (s) => s.id === sessionID
           );
           temp2.sectionID = id;
-          dbSession.create(temp2);
+          if (
+            await checkConflict(
+              temp2.sectionID,
+              temp2.hour,
+              temp2.day,
+              temp2.roomNo
+            )
+          ) {
+            return new Response(
+              ResponseStatus.BAD_REQUEST,
+              null,
+              `Session ${temp2.id} has conflict`
+            );
+          }
+          await dbSession.create(temp2);
         }
         const session = await dbSession.findByPk(sessionID);
         if (session) {
-          session.update(
-            data["section-sessions"].find((s) => s.id === sessionID)
-          );
+          console.log("Updating session");
+          const temp = data["section-sessions"].find((s) => s.id === sessionID);
+          if (await checkConflict(temp.id, temp.hour, temp.day, temp.roomNo)) {
+            return new Response(
+              ResponseStatus.BAD_REQUEST,
+              null,
+              `Session ${temp.id} has conflict`
+            );
+          }
+          await session.update(temp);
         }
       }
       await section.update(data);
@@ -230,7 +257,7 @@ const edit = async (id, data) => {
     return new Response(
       ResponseStatus.INTERNAL_SERVER_ERROR,
       null,
-      "An error occurred"
+      error.errors[0].message
     );
   }
 };
@@ -294,7 +321,7 @@ const getForStudent = async (id) => {
                 departmentID: student.dataValues.departmentID,
               },
               as: "course-department",
-              attributes: ["departmentID", "period"],
+              attributes: ["departmentID", "period", "id", "courseID"],
             },
           ],
         },
@@ -314,7 +341,6 @@ const getForStudent = async (id) => {
 
     //filtering the sections based on the period provided
     for (const section of sections) {
-      console.log(section.dataValues.course.dataValues);
       if (
         section.dataValues.course.dataValues["course-department"][0].dataValues
           .period > student.dataValues.period
@@ -334,32 +360,74 @@ const getForStudent = async (id) => {
   }
 };
 
-const checkConflict = (hour, sessions) => {
-  const [newStart, newEnd] = hour.split("-");
-  //assigning the start and end time to a value
-  const [newStartHour, newStartMinute] = newStart.split(":");
-  const newStartValue = parseInt(newStartHour) * 60 + parseInt(newStartMinute);
+const checkConflict = async (id, hour, day, roomNo) => {
+  try {
+    const sessions = await dbSection.findAll({
+      include: [
+        {
+          model: dbSession,
+          as: "section-sessions",
+          required: true,
+          where: {
+            day: day,
+            roomNo: roomNo,
+          },
+          attributes: ["id", "day", "hour"],
+        },
+      ],
+      attributes: ["id"],
+    });
 
-  const [newEndHour, newEndMinute] = newEnd.split(":");
-  const newEndValue = parseInt(newEndHour) * 60 + parseInt(newEndMinute);
-  for (const sectionsessions of sessions) {
-    const hour =
-      sectionsessions.dataValues["section-sessions"][0].dataValues.hour;
-    //checking the hour of matching day and room
-    const [start, end] = hour.split("-");
+    const [newStart, newEnd] = hour.split("-");
+    const [newStartHour, newStartMinute] = newStart.split(":");
+    var newStartValue = parseInt(newStartHour) * 60 + parseInt(newStartMinute);
 
-    const [startHour, startMinute] = start.split(":");
-    const startValue = parseInt(startHour) * 60 + parseInt(startMinute);
+    const [newEndHour, newEndMinute] = newEnd.split(":");
+    var newEndValue = parseInt(newEndHour) * 60 + parseInt(newEndMinute);
 
-    const [endHour, endMinute] = end.split(":");
-    const endValue = parseInt(endHour) * 60 + parseInt(endMinute);
-    console.log(startValue, endValue, newStartValue, newEndValue);
-    //checking if the new section time is within the time of the existing section
-    if (
-      (newStartValue >= startValue && newStartValue <= endValue) ||
-      (newEndValue >= startValue && newEndValue <= endValue)
-    )
-      return true;
+    if (newEndValue < newStartValue) {
+      newEndValue += 24 * 60;
+    }
+
+    for (const sectionsessions of sessions) {
+      for (const session of sectionsessions.dataValues["section-sessions"]) {
+        console.log(session.dataValues);
+
+        if (session.dataValues.id === id) {
+          continue;
+        }
+        const hour = session.dataValues.hour;
+        //checking the hour of matching day and room
+        const [start, end] = hour.split("-");
+        console.log(start, end);
+        const [startHour, startMinute] = start.split(":");
+        var startValue = parseInt(startHour) * 60 + parseInt(startMinute);
+
+        const [endHour, endMinute] = end.split(":");
+        var endValue = parseInt(endHour) * 60 + parseInt(endMinute);
+        if (endValue < startValue) {
+          endValue += 24 * 60;
+        }
+        console.log(startValue, endValue, newStartValue, newEndValue);
+        //checking if the new section time is within the time of the existing section
+
+        if (
+          (newStartValue >= startValue && newStartValue <= endValue) ||
+          (newEndValue >= startValue && newEndValue <= endValue)
+        ) {
+          console.log("Conflict");
+          return true;
+        }
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    return new Response(
+      ResponseStatus.INTERNAL_SERVER_ERROR,
+      null,
+      "An error occurred"
+    );
   }
 };
 

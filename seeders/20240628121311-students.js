@@ -19,8 +19,8 @@ module.exports = {
         {
           id: "33467246162",
           studentNo: "24023548",
-          firstName: "Alaz",
-          lastName: "Yıldırdı",
+          firstName: "Ali",
+          lastName: "Kendirli",
           gender: "F",
           departmentID: 2,
           period: 3,

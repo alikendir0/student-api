@@ -11,6 +11,7 @@ module.exports = function (app) {
   });
 
   app.get("/sections/student/:id", async (req, res) => {
+    console.log(req.params.id);
     try {
       const response = await sectionService.getForStudent(req.params.id);
       res.status(response.status).json(response);

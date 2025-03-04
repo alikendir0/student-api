@@ -38,6 +38,7 @@ module.exports = function (app) {
   });
 
   app.post("/course", async (req, res) => {
+    console.log(req.body);
     try {
       const response = await courseService.save(req.body);
       res.status(response.status).json(response);
