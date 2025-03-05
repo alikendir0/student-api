@@ -2,6 +2,9 @@
 
 This project is a Student Information System API built with Node.js, Express, and PostgreSQL, combined with Sequelize ORM. It provides endpoints to manage students, instructors, courses, sections, rooms, and departments.
 
+## Prerequisites
+- Node.js
+- PostgreSQL
 
 ## Installation
 
